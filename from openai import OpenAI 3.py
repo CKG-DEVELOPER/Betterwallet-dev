@@ -1,24 +1,30 @@
 from openai import OpenAI
-client = OpenAI(api_key="YOUR API-KEY HERE")
-print("Betterwallet AI Assistant")
-print("type 'quit' to exit")
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+print("BetterWallet AI Assistant")
+print("Type 'quit' to exit")
 print("-" * 30)
 
 while True:
-    user_input = input("you: ")
+    user_input = input("You: ")
 
     if user_input.lower() == "quit":
-        print("goodbye!")
+        print("Goodbye!")
         break
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "we sell airtime,data gift card across nigeria and across we are the number 1 best fintech app in nigeria, we also have job site and betterwallet verivication for online store to cop fraud"} ,
+            {"role": "system", "content": "You are a helpful financial assistant for BetterWallet, a Nigerian fintech app."},
             {"role": "user", "content": user_input}
-
         ]
-    )                
+    )
+
     reply = response.choices[0].message.content
-    print(f"bot: {reply}")
+    print(f"Bot: {reply}")
     print()
