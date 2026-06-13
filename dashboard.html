@@ -1,347 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetterWallet - Smart Finance for Nigerians</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: #000; color: #fff; }
-        nav {
-            background: #000;
-            padding: 20px 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #00ff44;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-        .logo { color: #00ff44; font-size: 28px; font-weight: bold; }
-        .nav-links a {
-            color: #fff;
-            text-decoration: none;
-            margin-left: 30px;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-        .nav-links a:hover { color: #00ff44; }
-        .hero {
-            background: linear-gradient(135deg, #000 0%, #001a0a 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 100px 20px;
-        }
-        .hero h1 { font-size: 60px; color: #fff; margin-bottom: 20px; }
-        .hero h1 span { color: #00ff44; }
-        .hero p {
-            font-size: 20px;
-            color: #ccc;
-            margin-bottom: 40px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .btn {
-            background: #00ff44;
-            color: #000;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            margin: 10px;
-            display: inline-block;
-            transition: transform 0.3s;
-        }
-        .btn:hover { transform: scale(1.05); }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #00ff44;
-            color: #00ff44;
-        }
-        .features {
-            padding: 100px 50px;
-            background: #0a0a0a;
-            text-align: center;
-        }
-        .features h2 { font-size: 40px; color: #00ff44; margin-bottom: 60px; }
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .feature-card {
-            background: #111;
-            border: 1px solid #00ff44;
-            border-radius: 15px;
-            padding: 40px 20px;
-            transition: transform 0.3s;
-        }
-        .feature-card:hover { transform: translateY(-10px); }
-        .feature-icon { font-size: 50px; margin-bottom: 20px; }
-        .feature-card h3 { color: #00ff44; font-size: 22px; margin-bottom: 15px; }
-        .feature-card p { color: #ccc; font-size: 16px; }
-        .about {
-            padding: 100px 50px;
-            background: #000;
-            text-align: center;
-        }
-        .about h2 { font-size: 40px; color: #00ff44; margin-bottom: 30px; }
-        .about p {
-            font-size: 18px;
-            color: #ccc;
-            max-width: 700px;
-            margin: 0 auto 20px;
-            line-height: 1.8;
-        }
-        .stats {
-            background: #00ff44;
-            padding: 60px 50px;
-            display: flex;
-            justify-content: center;
-            gap: 80px;
-            text-align: center;
-        }
-        .stat h3 { font-size: 50px; color: #000; font-weight: bold; }
-        .stat p { font-size: 18px; color: #000; }
-        .contact {
-            padding: 100px 50px;
-            background: #0a0a0a;
-            text-align: center;
-        }
-        .contact h2 { font-size: 40px; color: #00ff44; margin-bottom: 40px; }
-        .contact input, .contact textarea {
-            width: 100%;
-            max-width: 500px;
-            padding: 15px;
-            margin: 10px auto;
-            display: block;
-            background: #111;
-            border: 1px solid #00ff44;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-        }
-        .contact textarea { height: 150px; }
-        footer {
-            background: #000;
-            border-top: 2px solid #00ff44;
-            padding: 30px;
-            text-align: center;
-            color: #ccc;
-        }
-        footer span { color: #00ff44; }
-        .chat-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #00ff44;
-            color: #000;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 30px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 0 20px #00ff44;
-            z-index: 1000;
-        }
-        .chat-box {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 350px;
-            background: #111;
-            border: 2px solid #00ff44;
-            border-radius: 20px;
-            padding: 20px;
-            display: none;
-            z-index: 1000;
-        }
-        .chat-box h3 { color: #00ff44; margin-bottom: 15px; }
-        .chat-messages {
-            height: 200px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #000;
-            border-radius: 10px;
-        }
-        .chat-input { display: flex; gap: 10px; }
-        .chat-input input {
-            flex: 1;
-            padding: 10px;
-            background: #000;
-            border: 1px solid #00ff44;
-            border-radius: 10px;
-            color: #fff;
-        }
-        .chat-input button {
-            background: #00ff44;
-            color: #000;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .message { margin: 10px 0; padding: 8px 12px; border-radius: 10px; }
-        .user-msg { background: #00ff44; color: #000; text-align: right; }
-        .bot-msg { background: #222; color: #fff; }
-        @media (max-width: 768px) {
-            .features-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 36px; }
-            .stats { flex-direction: column; gap: 30px; }
-            nav { padding: 15px 20px; }
-            .nav-links { display: none; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetterWallet — Dashboard</title>
+<style>
+  :root{
+    --bg:#000000;
+    --surface:#0e0e0e;
+    --surface-2:#151515;
+    --green:#1fe06a;
+    --green-bright:#3bff8c;
+    --green-deep:#0a8f44;
+    --text:#ffffff;
+    --muted:#8b9290;
+    --line:rgba(31,224,106,.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:#050505;
+    display:flex;justify-content:center;
+    min-height:100vh;
+    padding:0;
+  }
+  .phone{
+    width:100%;max-width:420px;
+    background:var(--bg);
+    min-height:100vh;
+    position:relative;
+    padding-bottom:84px;
+    overflow:hidden;
+  }
+  .brandbar{
+    padding:16px 18px;
+    border-bottom:1px solid rgba(31,224,106,.25);
+    font-size:22px;font-weight:800;letter-spacing:-.5px;
+  }
+  .brandbar .g{color:var(--green);}
+  .brandbar .w{color:#fff;}
+  .greeting{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px 8px;
+  }
+  .greeting .hello{font-size:13px;color:var(--muted);}
+  .greeting .name{font-size:22px;font-weight:800;color:#fff;text-transform:capitalize;}
+  .verify{
+    border:1.5px solid var(--green);color:var(--green);
+    background:transparent;font-size:13px;font-weight:600;
+    padding:8px 14px;border-radius:999px;white-space:nowrap;margin-left:10px;
+  }
+  .cart{
+    width:42px;height:42px;border:1.5px solid var(--green);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:10px;
+  }
+  .cart svg{stroke:var(--green);}
+  .wrap{padding:8px 18px;}
+  .balance{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#1fe06a 0%,#1fe06a 22%,#15c25b 40%,#0b8841 56%,#064d26 72%,#021910 88%,#000 100%);
+    border-radius:20px;padding:22px;color:#fff;margin-top:8px;
+    box-shadow:0 0 28px rgba(31,224,106,.35);
+  }
+  .balance::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 0% 0%, rgba(59,255,140,.35), transparent 55%);
+    pointer-events:none;
+  }
+  .balance .lbl{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#03240f;position:relative;z-index:1;}
+  .balance .lbl svg{stroke:#03240f;}
+  .balance .amt{font-size:30px;font-weight:800;letter-spacing:3px;margin:14px 0 18px;position:relative;z-index:1;}
+  .balance .row{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+  .balance .hist{font-size:14px;font-weight:500;color:#9af3c3;}
+  .addmoney{
+    background:#fff;color:#0a8f44;border:none;border-radius:999px;
+    padding:9px 16px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;
+    box-shadow:0 0 18px rgba(255,255,255,.25);
+  }
+  .addmoney span{font-size:18px;line-height:1;}
+  .promo{
+    background:linear-gradient(135deg,#0e7a3c 0%,#063d22 100%);
+    border:1px solid var(--line);
+    border-radius:18px;padding:18px;margin-top:16px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .promo .circle{
+    width:46px;height:46px;border-radius:50%;
+    background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .promo .circle svg{stroke:#fff;}
+  .promo .t{font-size:17px;font-weight:800;color:#fff;}
+  .promo .s{font-size:13px;color:rgba(255,255,255,.8);margin-top:2px;}
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;padding:18px;margin-top:16px;
+    box-shadow:0 0 18px rgba(31,224,106,.08);
+  }
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .card-head .title{font-size:18px;font-weight:800;color:#fff;}
+  .card-head .viewall{font-size:13px;color:var(--green);font-weight:600;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px;}
+  .svc{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .svc .ic{
+    width:54px;height:54px;border-radius:50%;
+    background:var(--surface-2);border:1px solid rgba(31,224,106,.18);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .svc .ic svg{stroke:var(--green);}
+  .svc .nm{font-size:12px;color:#cfd3d2;text-align:center;}
+  .txn{display:flex;align-items:center;gap:12px;}
+  .txn .logo{
+    width:42px;height:42px;border-radius:50%;background:#e8202c;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;
+  }
+  .txn .mid{flex:1;}
+  .txn .mid .nm{font-size:14px;font-weight:700;color:#fff;line-height:1.2;}
+  .txn .mid .dt{font-size:12px;color:var(--muted);margin-top:3px;}
+  .txn .right{text-align:right;}
+  .txn .right .val{font-size:14px;font-weight:700;color:#fff;}
+  .txn .right .st{font-size:12px;color:var(--green);margin-top:3px;}
+  .refer{
+    background:linear-gradient(135deg,#0e7a3c 0%,#053a1f 100%);
+    border:1px solid var(--line);
+    border-radius:18px;padding:20px;margin-top:16px;color:#fff;
+    box-shadow:0 0 22px rgba(31,224,106,.18);
+  }
+  .refer .h{font-size:20px;font-weight:800;line-height:1.2;}
+  .refer .p{font-size:14px;color:rgba(255,255,255,.85);margin:10px 0 16px;line-height:1.4;}
+  .refer .btn{
+    background:#fff;color:#0a8f44;border:none;border-radius:999px;
+    padding:11px 20px;font-size:14px;font-weight:700;
+  }
+  .chat-fab{
+    position:absolute;right:18px;bottom:100px;
+    width:62px;height:62px;border-radius:50%;
+    background:var(--green);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 24px 6px rgba(31,224,106,.6);
+    cursor:pointer;animation:pulse 2.2s ease-in-out infinite;
+  }
+  .chat-fab svg{stroke:#063d22;}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 22px 4px rgba(31,224,106,.55);}
+    50%{box-shadow:0 0 30px 10px rgba(31,224,106,.85);}
+  }
+  @media (prefers-reduced-motion: reduce){ .chat-fab{animation:none;} }
+  .bottomnav{
+    position:absolute;left:0;right:0;bottom:0;
+    background:#0a0a0a;border-top:1px solid rgba(31,224,106,.25);
+    display:flex;justify-content:space-around;align-items:center;
+    padding:10px 0 14px;
+  }
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted);}
+  .nav-item svg{stroke:var(--muted);}
+  .nav-item.active{color:var(--green);}
+  .nav-item.active svg{stroke:var(--green);}
+  .spacer{height:6px;}
+</style>
 </head>
 <body>
+  <div class="phone">
 
-<nav>
-    <div class="logo">Better<span style="color:#fff">Wallet</span></div>
-    <div class="nav-links">
-        <a href="#home">Home</a>
-        <a href="#features">Features</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+    <div class="brandbar"><span class="g">Better</span><span class="w">Wallet</span></div>
+
+    <div class="greeting">
+      <div>
+        <div class="hello">Good Evening!</div>
+        <div class="name">Kingsley</div>
+      </div>
+      <button class="verify">Verify your account</button>
+      <div class="cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      </div>
     </div>
-</nav>
 
-<section class="hero" id="home">
-    <div>
-        <h1>Nigeria's <span>Smartest</span><br>Finance App</h1>
-        <p>Buy airtime, data, gift cards and manage your money smarter with AI-powered financial assistance.</p>
-        <a href="#features" class="btn">Get Started</a>
-        <a href="#contact" class="btn btn-outline">Learn More</a>
-        <a href="dashboard.html" class="btn">Open Dashboard</a>
+    <div class="wrap">
+
+      <div class="balance">
+        <div class="lbl">Available Balance
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </div>
+        <div class="amt">✦ ✦ ✦ ✦</div>
+        <div class="row">
+          <span class="hist">Transaction History</span>
+          <button class="addmoney"><span>+</span> Add Money</button>
+        </div>
+      </div>
+
+      <div class="promo">
+        <div class="circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <div class="t">Bulk Airtime Purchase</div>
+          <div class="s">Buy airtime for multiple numbers at once</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="title">Services</span><span class="viewall">View All</span></div>
+        <div class="grid">
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.74-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg></div><div class="nm">Airtime</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div><div class="nm">Data</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></div><div class="nm">Electricity</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="m8 7 4-4 4 4"/></svg></div><div class="nm">TV</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="nm">Gift Card</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div class="nm">Internet</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div><div class="nm">E-sims</div></div>
+          <div class="svc"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div><div class="nm">More</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="title">Recent Transactions</span><span class="viewall">View All</span></div>
+        <div class="txn">
+          <div class="logo">airtel</div>
+          <div class="mid">
+            <div class="nm">Airtel Airtime VTU Topup</div>
+            <div class="dt">May 25, 2026 · 21:32</div>
+          </div>
+          <div class="right">
+            <div class="val">₦400.00</div>
+            <div class="st">Completed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="refer">
+        <div class="h">Refer &amp; Earn<br>Per Friend</div>
+        <div class="p">Help your friends switch to BetterWallet and get rewarded for every referral.</div>
+        <button class="btn">Start referring now!</button>
+      </div>
+
+      <div class="spacer"></div>
     </div>
-</section>
 
-<section class="features" id="features">
-    <h2>What BetterWallet Offers</h2>
-    <div class="features-grid">
-        <div class="feature-card">
-            <div class="feature-icon">📱</div>
-            <h3>Buy Airtime & Data</h3>
-            <p>Instant airtime and data purchase for all Nigerian networks at the best rates.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🎁</div>
-            <h3>Gift Cards</h3>
-            <p>Buy and sell gift cards easily. Local and international cards available 24/7.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <h3>AI Financial Assistant</h3>
-            <p>Get smart financial advice powered by artificial intelligence anytime you need it.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <h3>BetterWallet Trust</h3>
-            <p>Secure and verified transactions with our advanced trust and safety system.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">💳</div>
-            <h3>Better Payments</h3>
-            <p>Send and receive money instantly with BVN and NIN verified accounts.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Financial Reports</h3>
-            <p>Track your spending and savings with detailed financial reports and insights.</p>
-        </div>
+    <div class="chat-fab" title="BetterWallet AI">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><circle cx="8.5" cy="12" r="1" fill="#063d22" stroke="none"/><circle cx="12" cy="12" r="1" fill="#063d22" stroke="none"/><circle cx="15.5" cy="12" r="1" fill="#063d22" stroke="none"/></svg>
     </div>
-</section>
 
-<section class="about" id="about">
-    <h2>About BetterWallet</h2>
-    <p>BetterWallet is a Nigerian fintech app designed to help everyday Nigerians take control of their finances.</p>
-    <p>Built with cutting-edge AI technology, BetterWallet is your smartest financial companion — available 24/7, anywhere in Nigeria and abroad.</p>
-</section>
-
-<div class="stats">
-    <div class="stat"><h3>10K+</h3><p>Happy Users</p></div>
-    <div class="stat"><h3>99%</h3><p>Success Rate</p></div>
-    <div class="stat"><h3>24/7</h3><p>Available</p></div>
-    <div class="stat"><h3>₦1B+</h3><p>Transactions</p></div>
-</div>
-
-<section class="contact" id="contact">
-    <h2>Get In Touch</h2>
-    <input type="text" placeholder="Your Name">
-    <input type="email" placeholder="Your Email">
-    <textarea placeholder="Your Message"></textarea>
-    <br>
-    <button class="btn">Send Message</button>
-</section>
-
-<footer>
-    <p>© 2026 <span>BetterWallet</span> — Built with ❤️ in Nigeria 🇳🇬</p>
-</footer>
-
-<button class="chat-btn" onclick="toggleChat()">💬</button>
-
-<div class="chat-box" id="chatBox">
-    <h3>🤖 BetterWallet AI</h3>
-    <div class="chat-messages" id="chatMessages">
-        <div class="message bot-msg">Hello! I'm your BetterWallet AI assistant. How can I help you today?</div>
+    <div class="bottomnav">
+      <div class="nav-item active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Services
+      </div>
+      <div class="nav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        Refer &amp; Earn
+      </div>
+      <div class="nav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+        Profile
+      </div>
     </div>
-    <div class="chat-input">
-        <input type="text" id="chatInput" placeholder="Ask me anything..." onkeypress="handleKey(event)">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-</div>
 
-<script>
-    function toggleChat() {
-        const box = document.getElementById('chatBox');
-        box.style.display = box.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function handleKey(event) {
-        if (event.key === 'Enter') sendMessage();
-    }
-
-    async function sendMessage() {
-        const input = document.getElementById('chatInput');
-        const messages = document.getElementById('chatMessages');
-        const text = input.value.trim();
-        if (!text) return;
-
-        messages.innerHTML += `<div class="message user-msg">${text}</div>`;
-        input.value = '';
-        messages.innerHTML += `<div class="message bot-msg" id="typing">Typing...</div>`;
-        messages.scrollTop = messages.scrollHeight;
-
-        try {
-            const response = await fetch('https://betterwallet-dev.onrender.com/chat',{
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({message: text})
-            });
-            const data = await response.json(); 
-            document.getElementById('typing').remove();
-            messages.innerHTML += `<div class="message bot-msg">${data.reply}</div>`;
-        } catch(error) {
-            document.getElementById('typing').remove();
-            messages.innerHTML += `<div class="message bot-msg">Sorry, I cannot connect right now. Please try again!</div>`;
-        }
-
-        messages.scrollTop = messages.scrollHeight;
-    }
-</script>
-
+  </div>
 </body>
 </html>
