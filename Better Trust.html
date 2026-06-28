@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Better-Trust | BetterWallet</title>
+<style>
+  body{background:#000;color:#fff;font-family:Arial,sans-serif;margin:0;padding:0;}
+  .phone{max-width:430px;margin:0 auto;padding:16px;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:10px 0 20px;}
+  .back{width:40px;height:40px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .topbar h1{font-size:20px;margin:0;}
+  .topbar p{font-size:13px;color:#9aa;margin:2px 0 0;}
+
+  .status-card{display:flex;align-items:center;gap:14px;background:#0e1410;border:1px solid #1f2a22;border-radius:16px;padding:16px;margin-bottom:18px;}
+  .status-icon{width:44px;height:44px;border-radius:12px;background:#0a3a22;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .status-text h3{margin:0;font-size:15px;}
+  .status-text p{margin:4px 0 0;font-size:13px;color:#9aa;}
+  .pending-badge{margin-left:auto;background:#3a2a0a;color:#e0a93a;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap;}
+
+  .banner{background:linear-gradient(135deg,#0e7a3c 0%,#053a1f 100%);border-radius:18px;padding:20px;margin-bottom:16px;}
+  .banner h2{margin:0 0 8px;font-size:18px;}
+  .banner p{margin:0;font-size:14px;color:rgba(255,255,255,.85);line-height:1.4;}
+
+  .btn-primary{display:block;width:100%;background:#1ee06a;color:#063d22;border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;margin-bottom:24px;cursor:pointer;}
+
+  .section-title{font-size:16px;font-weight:700;margin-bottom:12px;}
+  .seller-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #1a1a1a;}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+  .seller-info{flex:1;}
+  .seller-info .name{font-size:14px;font-weight:600;}
+  .seller-info .loc{font-size:12px;color:#9aa;margin-top:2px;}
+  .verified-badge{background:#0a3a22;color:#1ee06a;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap;}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="topbar">
+      <div class="back" onclick="window.location.href='dashboard.html'">←</div>
+      <div>
+        <h1>Better-Trust</h1>
+        <p>Verified seller program</p>
+      </div>
+    </div>
+
+    <div class="status-card">
+      <div class="status-icon">🛡️</div>
+      <div class="status-text">
+        <h3>Your status</h3>
+        <p>Documents under review</p>
+      </div>
+      <div class="pending-badge">⏱ Pending</div>
+    </div>
+
+    <div class="banner">
+      <h2>Become a Verified Member</h2>
+      <p>Build trust with buyers and partners. Verified members get a green badge across BetterWallet, CAC services and the seller directory.</p>
+    </div>
+
+    <button class="btn-primary" onclick="alert('Verification form coming soon!')">Get Verified</button>
+
+    <div class="section-title">Verified Sellers & People</div>
+
+    <div class="seller-row">
+      <div class="avatar">AO</div>
+      <div class="seller-info">
+        <div class="name">Ada Okafor Stores</div>
+        <div class="loc">Lagos · Electronics</div>
+      </div>
+      <div class="verified-badge">✓ Verified</div>
+    </div>
+
+    <div class="seller-row">
+      <div class="avatar">BM</div>
+      <div class="seller-info">
+        <div class="name">Bello Multiventures</div>
+        <div class="loc">Abuja · Fashion</div>
+      </div>
+      <div class="verified-badge">✓ Verified</div>
+    </div>
+
+    <div class="seller-row">
+      <div class="avatar">CK</div>
+      <div class="seller-info">
+        <div class="name">Chidi Kitchen NG</div>
+        <div class="loc">Enugu · Food</div>
+      </div>
+      <div class="verified-badge">✓ Verified</div>
+    </div>
+
+  </div>
+</body>
+</html>
