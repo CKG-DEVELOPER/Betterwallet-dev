@@ -59,4 +59,44 @@
       <p>Build trust with buyers and partners. Verified members get a green badge across BetterWallet, CAC services and the seller directory.</p>
     </div>
 
-    <button class="btn-primary" onclick="alert('Verification form coming soon!')">Get Verified</button>
+    <button class="btn-primary" onclick="showStep(1)">Get Verified</button>
+    
+    <div id="step-1" class="hidden">
+  <div class="stepper">
+    <div class="step-dot active">1</div>
+    <div class="step-line"></div>
+    <div class="step-dot">2</div>
+    <div class="step-line"></div>
+    <div class="step-dot">3</div>
+    <div class="step-line"></div>
+    <div class="step-dot">4</div>
+    <div class="step-line"></div>
+    <div class="step-dot">5</div>
+  </div>
+  <div class="step-labels">
+    <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+  </div>
+
+  <div class="field">
+    <label>Full Name</label>
+    <input type="text" placeholder="e.g. Chinedu Kalu">
+  </div>
+  <div class="field">
+    <label>Business Name</label>
+    <input type="text" placeholder="Registered or trading name">
+  </div>
+  <div class="field">
+    <label>Phone Number</label>
+    <input type="text" placeholder="0800 000 0000">
+  </div>
+  <div class="field">
+    <label>Email Address</label>
+    <input type="email" placeholder="you@email.com">
+  </div>
+  <div class="field">
+    <label>Physical Address</label>
+    <input type="text" placeholder="Street, city, state">
+  </div>
+
+  <button class="btn-primary" onclick="alert('Step 2 coming soon!')">Continue</button>
+</div>
