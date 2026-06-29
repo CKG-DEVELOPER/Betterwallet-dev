@@ -29,9 +29,10 @@
   .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
   .field input{width:100%;background:#111;border:1px solid #222;border-radius:10px;padding:14px;color:#fff;font-size:14px;box-sizing:border-box;}
   .field input::placeholder{color:#666;}
+
   .upload-box{border:1px dashed #333;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;cursor:pointer;}
-.upload-box p{margin:0;font-size:13px;color:#9aa;}
-.upload-box .filename{color:#1ee06a;font-size:13px;margin-top:6px;}
+  .upload-box p{margin:0;font-size:13px;color:#9aa;}
+  .upload-box .filename{color:#1ee06a;font-size:13px;margin-top:6px;}
 </style>
 </head>
 <body>
@@ -93,47 +94,85 @@
 
       <button class="btn-primary" onclick="showStep(2)">Continue</button>
     </div>
+
     <div id="step-2" class="hidden">
-  <div class="stepper">
-    <div class="step-dot">1</div>
-    <div class="step-line active"></div>
-    <div class="step-dot active">2</div>
-    <div class="step-line"></div>
-    <div class="step-dot">3</div>
-    <div class="step-line"></div>
-    <div class="step-dot">4</div>
-    <div class="step-line"></div>
-    <div class="step-dot">5</div>
-  </div>
-  <div class="step-labels">
-    <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+
+      <div class="upload-box" onclick="alert('File picker coming soon!')">
+        <p>📄 Upload ID Document (NIN, License, or Passport)</p>
+      </div>
+
+      <div class="upload-box" onclick="alert('File picker coming soon!')">
+        <p>🏢 Upload Proof of Business (CAC certificate, optional)</p>
+      </div>
+
+      <div class="upload-box" onclick="alert('File picker coming soon!')">
+        <p>🤳 Upload Selfie Holding ID</p>
+      </div>
+
+      <button class="btn-primary" onclick="showStep(3)">Continue</button>
+    </div>
+
+    <div id="step-3" class="hidden">
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+
+      <div class="banner">
+        <h2>Verification Fee</h2>
+        <p>A monthly fee of ₦2,500 keeps your verified badge active. Transfer to the account below, then tap "I've Made the Transfer."</p>
+      </div>
+
+      <div class="field">
+        <label>Bank Name</label>
+        <input type="text" value="Moniepoint Microfinance Bank" readonly>
+      </div>
+      <div class="field">
+        <label>Account Number</label>
+        <input type="text" value="4000732830" readonly>
+      </div>
+      <div class="field">
+        <label>Account Name</label>
+        <input type="text" value="Ckg Foods" readonly>
+      </div>
+
+      <button class="btn-primary" onclick="showStep(4)">I've Made the Transfer</button>
+    </div>
+
   </div>
 
-  <div class="upload-box" onclick="alert('File picker coming soon!')">
-    <p>📄 Upload ID Document (NIN, License, or Passport)</p>
-  </div>
-
-  <div class="upload-box" onclick="alert('File picker coming soon!')">
-    <p>🏢 Upload Proof of Business (CAC certificate, optional)</p>
-  </div>
-
-  <div class="upload-box" onclick="alert('File picker coming soon!')">
-    <p>🤳 Upload Selfie Holding ID</p>
-  </div>
-
-  <button class="btn-primary" onclick="alert('Step 3 coming soon!')">Continue</button>
-</div>
-
-  </div>
   <script>
-  
-
-  function showStep(n){
-  document.getElementById('step-landing').classList.add('hidden');
-  document.getElementById('step-1').classList.add('hidden');
-  document.getElementById('step-2').classList.add('hidden');
-  document.getElementById('step-' + n).classList.remove('hidden');
-}
+    function showStep(n){
+      document.getElementById('step-landing').classList.add('hidden');
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-3').classList.add('hidden');
+      document.getElementById('step-' + n).classList.remove('hidden');
+    }
   </script>
 </body>
 </html>
