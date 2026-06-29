@@ -12,40 +12,28 @@
   .topbar h1{font-size:20px;margin:0;}
   .topbar p{font-size:13px;color:#9aa;margin:2px 0 0;}
 
-  .status-card{display:flex;align-items:center;gap:14px;background:#0e1410;border:1px solid #1f2a22;border-radius:16px;padding:16px;margin-bottom:18px;}
-  .status-icon{width:44px;height:44px;border-radius:12px;background:#0a3a22;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .status-text h3{margin:0;font-size:15px;}
-  .status-text p{margin:4px 0 0;font-size:13px;color:#9aa;}
-  .pending-badge{margin-left:auto;background:#3a2a0a;color:#e0a93a;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap;}
-
   .banner{background:linear-gradient(135deg,#0e7a3c 0%,#053a1f 100%);border-radius:18px;padding:20px;margin-bottom:16px;}
   .banner h2{margin:0 0 8px;font-size:18px;}
   .banner p{margin:0;font-size:14px;color:rgba(255,255,255,.85);line-height:1.4;}
 
   .btn-primary{display:block;width:100%;background:#1ee06a;color:#063d22;border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;margin-bottom:24px;cursor:pointer;}
 
-  .section-title{font-size:16px;font-weight:700;margin-bottom:12px;}
-  .seller-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #1a1a1a;}
-  .avatar{width:42px;height:42px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
-  .seller-info{flex:1;}
-  .seller-info .name{font-size:14px;font-weight:600;}
-  .seller-info .loc{font-size:12px;color:#9aa;margin-top:2px;}
-  .verified-badge{background:#0a3a22;color:#1ee06a;font-size:12px;padding:6px 12px;border-radius:999px;white-space:nowrap;}
   .hidden{display:none;}
-.stepper{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-.step-dot{width:32px;height:32px;border-radius:50%;background:#111;color:#9aa;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
-.step-dot.active{background:#1ee06a;color:#063d22;}
-.step-line{flex:1;height:2px;background:#222;margin:0 4px;}
-.step-line.active{background:#1ee06a;}
-.step-labels{display:flex;justify-content:space-between;font-size:11px;color:#9aa;margin-bottom:24px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
-.field input{width:100%;background:#111;border:1px solid #222;border-radius:10px;padding:14px;color:#fff;font-size:14px;box-sizing:border-box;}
-.field input::placeholder{color:#666;}
+  .stepper{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .step-dot{width:32px;height:32px;border-radius:50%;background:#111;color:#9aa;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .step-dot.active{background:#1ee06a;color:#063d22;}
+  .step-line{flex:1;height:2px;background:#222;margin:0 4px;}
+  .step-line.active{background:#1ee06a;}
+  .step-labels{display:flex;justify-content:space-between;font-size:11px;color:#9aa;margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .field input{width:100%;background:#111;border:1px solid #222;border-radius:10px;padding:14px;color:#fff;font-size:14px;box-sizing:border-box;}
+  .field input::placeholder{color:#666;}
 </style>
 </head>
 <body>
   <div class="phone">
+
     <div class="topbar">
       <div class="back" onclick="window.location.href='dashboard.html'">←</div>
       <div>
@@ -54,52 +42,62 @@
       </div>
     </div>
 
-    <div class="banner">
-      <h2>Become a Verified Member</h2>
-      <p>Build trust with buyers and partners. Verified members get a green badge across BetterWallet, CAC services and the seller directory.</p>
+    <div id="step-landing">
+      <div class="banner">
+        <h2>Become a Verified Member</h2>
+        <p>Build trust with buyers and partners. Verified members get a green badge across BetterWallet, CAC services and the seller directory.</p>
+      </div>
+
+      <button class="btn-primary" onclick="showStep(1)">Get Verified</button>
     </div>
 
-    <button class="btn-primary" onclick="showStep(1)">Get Verified</button>
-    
     <div id="step-1" class="hidden">
-  <div class="stepper">
-    <div class="step-dot active">1</div>
-    <div class="step-line"></div>
-    <div class="step-dot">2</div>
-    <div class="step-line"></div>
-    <div class="step-dot">3</div>
-    <div class="step-line"></div>
-    <div class="step-dot">4</div>
-    <div class="step-line"></div>
-    <div class="step-dot">5</div>
-  </div>
-  <div class="step-labels">
-    <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
-  </div>
+      <div class="stepper">
+        <div class="step-dot active">1</div>
+        <div class="step-line"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
 
-  <div class="field">
-    <label>Full Name</label>
-    <input type="text" placeholder="e.g. Chinedu Kalu">
-  </div>
-  <div class="field">
-    <label>Business Name</label>
-    <input type="text" placeholder="Registered or trading name">
-  </div>
-  <div class="field">
-    <label>Phone Number</label>
-    <input type="text" placeholder="0800 000 0000">
-  </div>
-  <div class="field">
-    <label>Email Address</label>
-    <input type="email" placeholder="you@email.com">
-  </div>
-  <div class="field">
-    <label>Physical Address</label>
-    <input type="text" placeholder="Street, city, state">
-  </div>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" placeholder="e.g. Chinedu Kalu">
+      </div>
+      <div class="field">
+        <label>Business Name</label>
+        <input type="text" placeholder="Registered or trading name">
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="text" placeholder="0800 000 0000">
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@email.com">
+      </div>
+      <div class="field">
+        <label>Physical Address</label>
+        <input type="text" placeholder="Street, city, state">
+      </div>
 
-  <button class="btn-primary" onclick="alert('Step 2 coming soon!')">Continue</button>
-</div>
+      <button class="btn-primary" onclick="alert('Step 2 coming soon!')">Continue</button>
     </div>
+
+  </div>
+
+  <script>
+    function showStep(n){
+      document.getElementById('step-landing').classList.add('hidden');
+      document.getElementById('step-1').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
