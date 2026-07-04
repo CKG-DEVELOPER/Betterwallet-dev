@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from chatbot import get_chat_reply
 import os
 
 load_dotenv()
+
+from chatbot import get_chat_reply
+
 app = Flask(__name__)
 CORS(app)
 
