@@ -1,0 +1,16 @@
+def save_user(name , email):
+    file = open("users.txt", "a")
+    file.write(name + "  - " + email + "\n")
+    file.close()
+    print("success")
+def view_users():
+    file = open("users.txt" , "r")
+    print(file.read())
+    file.close()
+name = input("enter name: ")
+email = input("email: ")
+referral = input("enter your referral code: ")
+bvn = input("enter you bvn:")
+nin = input("enter your nin:")
+save_user(name, email)
+view_users()

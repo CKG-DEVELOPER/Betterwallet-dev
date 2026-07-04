@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Better-Trust | BetterWallet</title>
+<style>
+  body{background:#000;color:#fff;font-family:Arial,sans-serif;margin:0;padding:0;}
+  .phone{max-width:430px;margin:0 auto;padding:16px;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:10px 0 20px;}
+  .back{width:40px;height:40px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .topbar h1{font-size:20px;margin:0;}
+  .topbar p{font-size:13px;color:#9aa;margin:2px 0 0;}
+
+  .banner{background:linear-gradient(135deg,#0e7a3c 0%,#053a1f 100%);border-radius:18px;padding:20px;margin-bottom:16px;}
+  .banner h2{margin:0 0 8px;font-size:18px;}
+  .banner p{margin:0;font-size:14px;color:rgba(255,255,255,.85);line-height:1.4;}
+
+  .btn-primary{display:block;width:100%;background:#1ee06a;color:#063d22;border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;margin-bottom:24px;cursor:pointer;}
+
+  .hidden{display:none;}
+  .stepper{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .step-dot{width:32px;height:32px;border-radius:50%;background:#111;color:#9aa;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .step-dot.active{background:#1ee06a;color:#063d22;}
+  .step-line{flex:1;height:2px;background:#222;margin:0 4px;}
+  .step-line.active{background:#1ee06a;}
+  .step-labels{display:flex;justify-content:space-between;font-size:11px;color:#9aa;margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .field input{width:100%;background:#111;border:1px solid #222;border-radius:10px;padding:14px;color:#fff;font-size:14px;box-sizing:border-box;}
+  .field input::placeholder{color:#666;}
+
+  .upload-box{border:1px dashed #333;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;cursor:pointer;}
+  .upload-box p{margin:0;font-size:13px;color:#9aa;}
+  .upload-box .filename{color:#1ee06a;font-size:13px;margin-top:6px;}
+</style>
+</head>
+<body>
+  <div class="phone">
+
+    <div class="topbar">
+      <div class="back" onclick="window.location.href='dashboard.html'">←</div>
+      <div>
+        <h1>Better-Trust</h1>
+        <p>Verified seller program</p>
+      </div>
+    </div>
+
+    <div id="step-landing">
+      <div class="banner">
+        <h2>Become a Verified Member</h2>
+        <p>Build trust with buyers and partners. Verified members get a green badge across BetterWallet, CAC services and the seller directory.</p>
+      </div>
+
+      <button class="btn-primary" onclick="showStep(1)">Get Verified</button>
+    </div>
+
+    <div id="step-1" class="hidden">
+      <div class="stepper">
+        <div class="step-dot active">1</div>
+        <div class="step-line"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" placeholder="e.g. Chinedu Kalu">
+      </div>
+      <div class="field">
+        <label>Business Name</label>
+        <input type="text" placeholder="Registered or trading name">
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="text" placeholder="0800 000 0000">
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@email.com">
+      </div>
+      <div class="field">
+        <label>Physical Address</label>
+        <input type="text" placeholder="Street, city, state">
+      </div>
+
+      <button class="btn-primary" onclick="showStep(2)">Continue</button>
+    </div>
+
+    <div id="step-2" class="hidden">
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+
+      <div class="upload-box" onclick="alert('File picker coming soon!')">
+        <p>📄 Upload ID Document (NIN, License, or Passport)</p>
+      </div>
+
+      <div class="upload-box" onclick="alert('File picker coming soon!')">
+        <p>🏢 Upload Proof of Business (CAC certificate, optional)</p>
+      </div>
+
+      <div class="upload-box" onclick="alert('File picker coming soon!')">
+        <p>🤳 Upload Selfie Holding ID</p>
+      </div>
+
+      <button class="btn-primary" onclick="showStep(3)">Continue</button>
+    </div>
+
+    <div id="step-3" class="hidden">
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+
+      <div class="banner">
+        <h2>Verification Fee</h2>
+        <p>A monthly fee of ₦2,500 keeps your verified badge active. Transfer to the account below, then tap "I've Made the Transfer."</p>
+      </div>
+
+      <div class="field">
+        <label>Bank Name</label>
+        <input type="text" value="Moniepoint Microfinance Bank" readonly>
+      </div>
+      <div class="field">
+        <label>Account Number</label>
+        <input type="text" value="4000732830" readonly>
+      </div>
+      <div class="field">
+        <label>Account Name</label>
+        <input type="text" value="Ckg Foods" readonly>
+      </div>
+
+      <button class="btn-primary" onclick="showStep(4)">I've Made the Transfer</button>
+    </div>
+
+  </div>
+
+  <script>
+    function showStep(n){
+      document.getElementById('step-landing').classList.add('hidden');
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-3').classList.add('hidden');
+      document.getElementById('step-' + n).classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
