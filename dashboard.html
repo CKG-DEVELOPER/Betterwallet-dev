@@ -7,19 +7,19 @@
 <style>
   :root{
     --bg:#000000;
-    --surface:#0e0e0e;
-    --surface-2:#151515;
-    --green:#1fe06a;
-    --green-bright:#3bff8c;
+    --surface:#0a0a0a;
+    --surface-2:#111111;
+    --green:#00ff44;
+    --green-bright:#00ff44;
     --green-deep:#0a8f44;
     --text:#ffffff;
     --muted:#8b9290;
-    --line:rgba(31,224,106,.35);
+    --line:rgba(0,255,68,.35);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:#050505;
+    background:#000000;
     display:flex;justify-content:center;
     min-height:100vh;
     padding:0;
@@ -34,7 +34,7 @@
   }
   .brandbar{
     padding:16px 18px;
-    border-bottom:1px solid rgba(31,224,106,.25);
+    border-bottom:1px solid rgba(0,255,68,.25);
     font-size:22px;font-weight:800;letter-spacing:-.5px;
   }
   .brandbar .g{color:var(--green);}
@@ -58,13 +58,13 @@
   .wrap{padding:8px 18px;}
   .balance{
     position:relative;overflow:hidden;
-    background:linear-gradient(135deg,#1fe06a 0%,#1fe06a 22%,#15c25b 40%,#0b8841 56%,#064d26 72%,#021910 88%,#000 100%);
+    background:linear-gradient(135deg,#00ff44 0%,#00ff44 22%,#0dd63c 40%,#0a8f44 56%,#054d26 72%,#021910 88%,#000 100%);
     border-radius:20px;padding:14px;color:#fff;margin-top:8px;
-    box-shadow:0 0 28px rgba(31,224,106,.35);
+    box-shadow:0 0 28px rgba(0,255,68,.35);
   }
   .balance::after{
     content:"";position:absolute;inset:0;
-    background:radial-gradient(120% 90% at 0% 0%, rgba(59,255,140,.35), transparent 55%);
+    background:radial-gradient(120% 90% at 0% 0%, rgba(0,255,68,.35), transparent 55%);
     pointer-events:none;
   }
   .balance .lbl{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#03240f;position:relative;z-index:1;}
@@ -95,7 +95,7 @@
     background:var(--surface);
     border:1px solid var(--line);
     border-radius:18px;padding:18px;margin-top:16px;
-    box-shadow:0 0 18px rgba(31,224,106,.08);
+    box-shadow:0 0 18px rgba(0,255,68,.08);
   }
   .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .card-head .title{font-size:18px;font-weight:800;color:#fff;}
@@ -104,7 +104,7 @@
   .svc{display:flex;flex-direction:column;align-items:center;gap:8px;}
   .svc .ic{
     width:54px;height:54px;border-radius:50%;
-    background:var(--surface-2);border:1px solid rgba(31,224,106,.18);
+    background:var(--surface-2);border:1px solid rgba(0,255,68,.18);
     display:flex;align-items:center;justify-content:center;
   }
   .svc .ic svg{stroke:var(--green);}
@@ -124,7 +124,7 @@
     background:linear-gradient(135deg,#0e7a3c 0%,#053a1f 100%);
     border:1px solid var(--line);
     border-radius:18px;padding:10px;margin-top:16px;color:#fff;
-    box-shadow:0 0 22px rgba(31,224,106,.18);
+    box-shadow:0 0 22px rgba(0,255,68,.18);
   }
   .refer .h{font-size:20px;font-weight:800;line-height:1.2;}
   .refer .p{font-size:14px;color:rgba(255,255,255,.85);margin:10px 0 16px;line-height:1.4;}
@@ -137,18 +137,18 @@
     width:62px;height:62px;border-radius:50%;
     background:var(--green);
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 24px 6px rgba(31,224,106,.6);
+    box-shadow:0 0 24px 6px rgba(0,255,68,.6);
     cursor:pointer;animation:pulse 2.2s ease-in-out infinite;
   }
   .chat-fab svg{stroke:#063d22;}
   @keyframes pulse{
-    0%,100%{box-shadow:0 0 22px 4px rgba(31,224,106,.55);}
-    50%{box-shadow:0 0 30px 10px rgba(31,224,106,.85);}
+    0%,100%{box-shadow:0 0 22px 4px rgba(0,255,68,.55);}
+    50%{box-shadow:0 0 30px 10px rgba(0,255,68,.85);}
   }
   @media (prefers-reduced-motion: reduce){ .chat-fab{animation:none;} }
   .bottomnav{
     position:fixed;left:0;right:0;bottom:0;
-    background:#0a0a0a;border-top:1px solid rgba(31,224,106,.25);
+    background:#0a0a0a;border-top:1px solid rgba(0,255,68,.25);
     display:flex;justify-content:space-around;align-items:center;
     padding:10px 0 14px;
   }
@@ -234,4 +234,3 @@
   </div>
 </body>
 </html>
-
