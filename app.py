@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -9,6 +9,18 @@ from chatbot import get_chat_reply
 
 app = Flask(__name__)
 CORS(app)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+@app.route('/bettertrust')
+def bettertrust():
+    return render_template('bettertrust.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
