@@ -223,9 +223,8 @@
     <div>
         <h1>Nigeria's <span>Smartest</span><br>Finance App</h1>
         <p>Buy airtime, data, gift cards and manage your money smarter with AI-powered financial assistance.</p>
-        <a href="#features" class="btn">Get Started</a>
-        <a href="#contact" class="btn btn-outline">Learn More</a>
-        <a href="/dashboard" class="btn">Open Dashboard</a>
+        <a href="#" id="getStartedBtn" class="btn">Get Started</a>
+        <a href="#features" class="btn btn-outline">Learn More</a>
     </div>
 </section>
 
@@ -341,6 +340,21 @@
 
         messages.scrollTop = messages.scrollHeight;
     }
+
+    document.getElementById('getStartedBtn').addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+            const response = await fetch('/me');
+            const data = await response.json();
+            if (data.logged_in) {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/register';
+            }
+        } catch (error) {
+            window.location.href = '/register';
+        }
+    });
 </script>
 
 </body>

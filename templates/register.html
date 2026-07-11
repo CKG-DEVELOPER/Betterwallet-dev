@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetterWallet - Sign Up</title>
+<style>
+  :root{
+    --bg:#000000;
+    --surface:#0a0a0a;
+    --green:#00ff44;
+    --text:#ffffff;
+    --muted:#8b9290;
+    --line:rgba(0,255,68,.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);
+    display:flex;justify-content:center;align-items:center;
+    min-height:100vh;padding:20px;
+  }
+  .card{
+    width:100%;max-width:400px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:32px 24px;
+  }
+  .logo{font-size:26px;font-weight:800;text-align:center;margin-bottom:8px;}
+  .logo .g{color:var(--green);}
+  .logo .w{color:#fff;}
+  .subtitle{text-align:center;color:var(--muted);font-size:14px;margin-bottom:28px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#fff;}
+  .field input{
+    width:100%;background:#111;border:1px solid #222;border-radius:10px;
+    padding:14px;color:#fff;font-size:14px;box-sizing:border-box;
+  }
+  .field input::placeholder{color:#666;}
+  .field input:focus{outline:none;border-color:var(--green);}
+  .btn-primary{
+    display:block;width:100%;background:var(--green);color:#063d22;
+    border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;
+    margin-top:8px;cursor:pointer;
+  }
+  .error-msg{
+    background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.4);
+    color:#ff8080;padding:12px;border-radius:10px;font-size:13px;margin-bottom:16px;
+    display:none;
+  }
+  .error-msg.show{display:block;}
+  .switch-link{text-align:center;margin-top:20px;font-size:14px;color:var(--muted);}
+  .switch-link a{color:var(--green);text-decoration:none;font-weight:600;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"><span class="g">Better</span><span class="w">Wallet</span></div>
+    <div class="subtitle">Create your account</div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <form id="registerForm">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="e.g. Chinedu Kalu" required>
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@email.com" required>
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="text" id="phone" placeholder="0800 000 0000" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="At least 6 characters" required minlength="6">
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Re-enter your password" required minlength="6">
+      </div>
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+
+    <div class="switch-link">
+      Already have an account? <a href="/login">Log in</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.classList.remove('show');
+
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match.';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      const data = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        password: password
+      };
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          window.location.href = '/login';
+        } else {
+          errorMsg.textContent = result.error || 'Something went wrong. Please try again.';
+          errorMsg.classList.add('show');
+        }
+      } catch (error) {
+        errorMsg.textContent = 'Could not connect. Please try again.';
+        errorMsg.classList.add('show');
+      }
+    });
+  </script>
+</body>
+</html>
