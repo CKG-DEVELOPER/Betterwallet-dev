@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Pending Jobs - BetterWallet StaffHook</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 24px 16px 60px;
+        }
+        .container { max-width: 480px; margin: 0 auto; }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #151515;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .heading h1 { font-size: 20px; margin: 0; }
+        .heading p { font-size: 13px; color: #8b9290; margin: 2px 0 0; }
+
+        .job-card {
+            background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .job-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+        .job-sub { font-size: 13px; color: #8b9290; margin: 0 0 6px; }
+        .employer-info { font-size: 13px; color: #cfd3d2; margin-bottom: 10px; }
+        .employer-info span { color: #8b9290; }
+        .pay {
+            color: #00ff88;
+            font-weight: 800;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .pay span { color: #8b9290; font-weight: 500; font-size: 13px; }
+        .job-description {
+            font-size: 14px;
+            color: #dddddd;
+            margin-bottom: 14px;
+            line-height: 1.5;
+            background-color: #0a0a0a;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .approve-btn {
+            background-color: #00ff88;
+            color: #000000;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .approve-btn:disabled {
+            background-color: #444444;
+            cursor: not-allowed;
+        }
+        .approved-label {
+            color: #00ff88;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888888;
+            margin-top: 60px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="top-row">
+        <a href="/dashboard" class="back-btn">←</a>
+        <div class="heading">
+            <h1>Pending Job Approvals</h1>
+            <p>Admin only · confirm payment before approving</p>
+        </div>
+    </div>
+
+    {% if jobs|length == 0 %}
+        <div class="empty-state">No jobs waiting for approval right now.</div>
+    {% else %}
+        {% for job in jobs %}
+        <div class="job-card" data-job-id="{{ job['id'] }}">
+            <div class="job-title">{{ job['title'] }}</div>
+            <div class="job-sub">{{ job['category'] }} · {{ job['location'] }}</div>
+            <div class="employer-info">Posted by: {{ job['employer_name'] }} <span>({{ job['employer_email'] }})</span></div>
+            <div class="pay">₦{{ job['pay_rate'] }} <span>/{{ job['pay_type'] }}</span></div>
+            <div class="job-description">{{ job['description'] }}</div>
+
+            <button class="approve-btn" onclick="approveJob(this, {{ job['id'] }})">
+                Approve (Payment Confirmed)
+            </button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+<script>
+    function approveJob(button, jobId) {
+        button.disabled = true;
+        button.textContent = 'Approving...';
+
+        fetch(`/staffhook/admin/approve-job/${jobId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(result => {
+            if (result.status === 200) {
+                const card = button.closest('.job-card');
+                button.outerHTML = '<div class="approved-label">✓ Approved — now live</div>';
+            } else {
+                alert(result.body.error);
+                button.disabled = false;
+                button.textContent = 'Approve (Payment Confirmed)';
+            }
+        })
+        .catch(() => {
+            alert('Something went wrong. Please try again.');
+            button.disabled = false;
+            button.textContent = 'Approve (Payment Confirmed)';
+        });
+    }
+</script>
+
+</body>
+</html>

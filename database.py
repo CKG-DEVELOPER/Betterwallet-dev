@@ -22,6 +22,39 @@ def init_db():
     conn.commit()
     conn.close()
 
+def init_staffhook_tables():
+    conn = get_db_connection()
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            employer_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            category TEXT NOT NULL,
+            location TEXT NOT NULL,
+            pay_rate TEXT NOT NULL,
+            pay_type TEXT NOT NULL,
+            status TEXT DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (employer_id) REFERENCES users (id)
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id INTEGER NOT NULL,
+            applicant_id INTEGER NOT NULL,
+            cover_message TEXT,
+            status TEXT DEFAULT 'pending',
+            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (job_id) REFERENCES jobs (id),
+            FOREIGN KEY (applicant_id) REFERENCES users (id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
     init_db()
+    init_staffhook_tables()
     print("Database initialized successfully.")
