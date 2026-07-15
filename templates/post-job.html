@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post a Job - BetterWallet StaffHook</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            background-color: #111111;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid #00ff88;
+        }
+        h1 {
+            color: #00ff88;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #cccccc;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333333;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 25px;
+            background-color: #00ff88;
+            color: #000000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #00cc6e;
+        }
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .error { color: #ff4d4d; }
+        .success { color: #00ff88; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1>Post a Job</h1>
+        <form id="postJobForm">
+            <label for="title">Job Title</label>
+            <input type="text" id="title" required>
+
+            <label for="description">Job Description</label>
+            <textarea id="description" required></textarea>
+
+            <label for="category">Category</label>
+            <input type="text" id="category" placeholder="e.g. Painting, Delivery, Cleaning" required>
+
+            <label for="location">Location</label>
+            <input type="text" id="location" placeholder="e.g. Asaba, Delta State" required>
+
+            <label for="pay_rate">Pay Rate</label>
+            <input type="text" id="pay_rate" placeholder="e.g. 5000" required>
+
+            <label for="pay_type">Pay Type</label>
+            <select id="pay_type" required>
+                <option value="">Select pay type</option>
+                <option value="hourly">Hourly</option>
+                <option value="daily">Daily</option>
+                <option value="fixed">Fixed Price</option>
+                <option value="salary">Monthly Salary</option>
+            </select>
+
+            <button type="submit">Post Job</button>
+            <div id="message"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('postJobForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = '';
+            messageDiv.className = '';
+
+            const payload = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                location: document.getElementById('location').value,
+                pay_rate: document.getElementById('pay_rate').value,
+                pay_type: document.getElementById('pay_type').value
+            };
+
+            try {
+                const response = await fetch('/staffhook/post-job', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = data.message;
+                    messageDiv.className = 'success';
+                    document.getElementById('postJobForm').reset();
+                } else {
+                    messageDiv.textContent = data.error;
+                    messageDiv.className = 'error';
+                }
+            } catch (err) {
+                messageDiv.textContent = 'Something went wrong. Please try again.';
+                messageDiv.className = 'error';
+            }
+        });
+    </script>
+
+</body>
+</html>

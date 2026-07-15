@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Applications - BetterWallet StaffHook</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 24px 16px 60px;
+        }
+        .container { max-width: 480px; margin: 0 auto; }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #151515;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .heading h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        .heading p {
+            font-size: 13px;
+            color: #8b9290;
+            margin: 2px 0 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid #2a2a2a;
+            color: #cfd3d2;
+            background-color: #111111;
+        }
+        .tab.active {
+            background-color: #00ff88;
+            color: #000000;
+            border-color: #00ff88;
+        }
+
+        .app-card {
+            background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .status-badge {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .status-badge.pending {
+            background-color: rgba(255, 200, 0, 0.15);
+            color: #ffc800;
+        }
+        .status-badge.accepted {
+            background-color: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+        }
+        .status-badge.rejected {
+            background-color: rgba(255, 77, 77, 0.15);
+            color: #ff4d4d;
+        }
+        .job-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0 0 4px;
+        }
+        .job-sub {
+            font-size: 13px;
+            color: #8b9290;
+            margin: 0 0 10px;
+        }
+        .pay {
+            color: #00ff88;
+            font-weight: 800;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .pay span {
+            color: #8b9290;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .cover-preview {
+            font-size: 13px;
+            color: #cfd3d2;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .applied-date {
+            font-size: 12px;
+            color: #666666;
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888888;
+            margin-top: 60px;
+            font-size: 14px;
+        }
+        .empty-state a {
+            color: #00ff88;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="top-row">
+        <a href="/dashboard" class="back-btn">←</a>
+        <div class="heading">
+            <h1>Staff Hook</h1>
+            <p>Find work · hire talent</p>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a href="/staffhook/jobs" class="tab">Find Jobs</a>
+        <a href="/staffhook/post-job" class="tab">Post a Job</a>
+        <div class="tab active">Request a Job</div>
+    </div>
+
+    {% if applications|length == 0 %}
+        <div class="empty-state">
+            You haven't applied to any jobs yet.<br><br>
+            <a href="/staffhook/jobs">Browse open jobs →</a>
+        </div>
+    {% else %}
+        {% for app in applications %}
+        <div class="app-card">
+            <div class="card-top">
+                {% if app['application_status'] == 'accepted' %}
+                    <span class="status-badge accepted">Accepted</span>
+                {% elif app['application_status'] == 'rejected' %}
+                    <span class="status-badge rejected">Rejected</span>
+                {% else %}
+                    <span class="status-badge pending">Pending</span>
+                {% endif %}
+            </div>
+
+            <div class="job-title">{{ app['title'] }}</div>
+            <div class="job-sub">{{ app['category'] }} · {{ app['location'] }}</div>
+            <div class="pay">₦{{ app['pay_rate'] }} <span>/{{ app['pay_type'] }}</span></div>
+
+            {% if app['cover_message'] %}
+                <div class="cover-preview">{{ app['cover_message'] }}</div>
+            {% endif %}
+
+            <div class="applied-date">Applied {{ app['applied_at'] }}</div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+</body>
+</html>
