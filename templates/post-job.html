@@ -1,150 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Post a Job - BetterWallet StaffHook</title>
-    <style>
-        body {
-            background-color: #000000;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .form-container {
-            background-color: #111111;
-            padding: 40px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 450px;
-            border: 1px solid #00ff88;
-        }
-        h1 {
-            color: #00ff88;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            color: #cccccc;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #333333;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 25px;
-            background-color: #00ff88;
-            color: #000000;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #00cc6e;
-        }
-        #message {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 14px;
-        }
-        .error { color: #ff4d4d; }
-        .success { color: #00ff88; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post a Job | BetterWallet StaffHook</title>
+<style>
+  body{background:#000;color:#fff;font-family:Arial,sans-serif;margin:0;padding:0;}
+  .phone{max-width:430px;margin:0 auto;padding:16px;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:10px 0 20px;}
+  .back{width:40px;height:40px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .topbar h1{font-size:20px;margin:0;}
+  .topbar p{font-size:13px;color:#9aa;margin:2px 0 0;}
+
+  .banner{background:linear-gradient(135deg,#0e7a3c 0%,#053a1f 100%);border-radius:18px;padding:20px;margin-bottom:16px;}
+  .banner h2{margin:0 0 8px;font-size:18px;}
+  .banner p{margin:0;font-size:14px;color:rgba(255,255,255,.85);line-height:1.4;}
+
+  .btn-primary{display:block;width:100%;background:#1ee06a;color:#063d22;border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;margin-bottom:24px;cursor:pointer;}
+  .btn-primary:disabled{background:#444;color:#999;cursor:not-allowed;}
+
+  .hidden{display:none;}
+  .stepper{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .step-dot{width:32px;height:32px;border-radius:50%;background:#111;color:#9aa;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .step-dot.active{background:#1ee06a;color:#063d22;}
+  .step-line{flex:1;height:2px;background:#222;margin:0 4px;}
+  .step-line.active{background:#1ee06a;}
+  .step-labels{display:flex;justify-content:space-between;font-size:11px;color:#9aa;margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .field input, .field textarea, .field select{width:100%;background:#111;border:1px solid #222;border-radius:10px;padding:14px;color:#fff;font-size:14px;box-sizing:border-box;font-family:inherit;}
+  .field textarea{min-height:90px;resize:vertical;}
+  .field input::placeholder, .field textarea::placeholder{color:#666;}
+  .field-copy{display:flex;gap:8px;}
+  .field-copy input{flex:1;}
+  .copy-btn{background:#1ee06a;color:#063d22;border:none;border-radius:10px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .done-card{background:#0e1410;border:1px solid #1f2a22;border-radius:18px;padding:24px;text-align:center;margin-bottom:24px;}
+  .done-icon{font-size:48px;margin-bottom:12px;}
+  .done-card h2{margin:0 0 8px;font-size:20px;color:#1ee06a;}
+  .done-card p{margin:0;font-size:14px;color:#9aa;line-height:1.5;}
+  .code-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:24px;}
+  .code-inputs input{width:48px;height:56px;background:#111;border:1px solid #222;border-radius:10px;color:#fff;font-size:20px;font-weight:700;text-align:center;}
+  .error-text{color:#ff4d4d;font-size:13px;margin:-12px 0 16px;}
+</style>
 </head>
 <body>
+  <div class="phone">
 
-    <div class="form-container">
+    <div class="topbar">
+      <div class="back" onclick="window.location.href='/staffhook/jobs'">←</div>
+      <div>
         <h1>Post a Job</h1>
-        <form id="postJobForm">
-            <label for="title">Job Title</label>
-            <input type="text" id="title" required>
-
-            <label for="description">Job Description</label>
-            <textarea id="description" required></textarea>
-
-            <label for="category">Category</label>
-            <input type="text" id="category" placeholder="e.g. Painting, Delivery, Cleaning" required>
-
-            <label for="location">Location</label>
-            <input type="text" id="location" placeholder="e.g. Asaba, Delta State" required>
-
-            <label for="pay_rate">Pay Rate</label>
-            <input type="text" id="pay_rate" placeholder="e.g. 5000" required>
-
-            <label for="pay_type">Pay Type</label>
-            <select id="pay_type" required>
-                <option value="">Select pay type</option>
-                <option value="hourly">Hourly</option>
-                <option value="daily">Daily</option>
-                <option value="fixed">Fixed Price</option>
-                <option value="salary">Monthly Salary</option>
-            </select>
-
-            <button type="submit">Post Job</button>
-            <div id="message"></div>
-        </form>
+        <p>Reach verified job seekers on StaffHook</p>
+      </div>
     </div>
 
-    <script>
-        document.getElementById('postJobForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    <!-- STEP 1: JOB DETAILS -->
+    <div id="step-1">
+      <div class="stepper">
+        <div class="step-dot active">1</div>
+        <div class="step-line"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
 
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = '';
-            messageDiv.className = '';
+      <div class="field">
+        <label>Job Title</label>
+        <input type="text" id="title" placeholder="e.g. Cashier Needed">
+      </div>
+      <div class="field">
+        <label>Job Description</label>
+        <textarea id="description" placeholder="Describe the role, requirements, and expectations"></textarea>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <input type="text" id="category" placeholder="e.g. Painting, Delivery, Cleaning">
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" id="location" placeholder="e.g. Asaba, Delta State">
+      </div>
+      <div class="field">
+        <label>Pay Rate</label>
+        <input type="text" id="pay_rate" placeholder="e.g. 5000">
+      </div>
+      <div class="field">
+        <label>Pay Type</label>
+        <select id="pay_type">
+          <option value="">Select pay type</option>
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+          <option value="fixed">Fixed Price</option>
+          <option value="salary">Monthly Salary</option>
+        </select>
+      </div>
+      <div id="step1-error" class="error-text hidden">Please fill in all fields.</div>
 
-            const payload = {
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                category: document.getElementById('category').value,
-                location: document.getElementById('location').value,
-                pay_rate: document.getElementById('pay_rate').value,
-                pay_type: document.getElementById('pay_type').value
-            };
+      <button class="btn-primary" onclick="goToPayment()">Continue to Payment</button>
+    </div>
 
-            try {
-                const response = await fetch('/staffhook/post-job', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+    <!-- STEP 2: PAY -->
+    <div id="step-2" class="hidden">
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+      <div class="banner">
+        <h2>Posting Fee</h2>
+        <p>A one-time fee of ₦2,500 is required to publish your job listing to StaffHook. Transfer to the account below, then tap "I've Made the Transfer."</p>
+      </div>
+      <div class="field">
+        <label>Bank Name</label>
+        <input type="text" value="Moniepoint Microfinance Bank" readonly>
+      </div>
+      <div class="field">
+        <label>Account Number</label>
+        <div class="field-copy">
+          <input type="text" id="acct-number" value="4000732830" readonly>
+          <button class="copy-btn" onclick="copyAccount()">Copy</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Account Name</label>
+        <input type="text" value="Ckg Foods" readonly>
+      </div>
+      <button class="btn-primary" onclick="showStep(3)">I've Made the Transfer</button>
+    </div>
 
-                const data = await response.json();
+    <!-- STEP 3: CODE -->
+    <div id="step-3" class="hidden">
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">3</div>
+        <div class="step-line"></div>
+        <div class="step-dot">4</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+      <div class="banner">
+        <h2>Enter Verification Code</h2>
+        <p>We've sent a 4-digit code to your phone number. Enter it below to confirm your payment.</p>
+      </div>
+      <div class="code-inputs">
+        <input type="number" maxlength="1" id="c1" oninput="moveNext(this,'c2')">
+        <input type="number" maxlength="1" id="c2" oninput="moveNext(this,'c3')">
+        <input type="number" maxlength="1" id="c3" oninput="moveNext(this,'c4')">
+        <input type="number" maxlength="1" id="c4">
+      </div>
+      <div id="code-error" class="error-text hidden">Please enter all 4 digits.</div>
+      <button class="btn-primary" id="verify-btn" onclick="verifyCodeAndPost()">Verify Code &amp; Post Job</button>
+    </div>
 
-                if (response.ok) {
-                    messageDiv.textContent = data.message;
-                    messageDiv.className = 'success';
-                    document.getElementById('postJobForm').reset();
-                } else {
-                    messageDiv.textContent = data.error;
-                    messageDiv.className = 'error';
-                }
-            } catch (err) {
-                messageDiv.textContent = 'Something went wrong. Please try again.';
-                messageDiv.className = 'error';
-            }
-        });
-    </script>
+    <!-- STEP 4: DONE -->
+    <div id="step-4" class="hidden">
+      <div class="stepper">
+        <div class="step-dot">1</div>
+        <div class="step-line active"></div>
+        <div class="step-dot">2</div>
+        <div class="step-line active"></div>
+        <div class="step-dot">3</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active">4</div>
+      </div>
+      <div class="step-labels">
+        <span>Details</span><span>Pay</span><span>Code</span><span>Done</span>
+      </div>
+      <div class="done-card">
+        <div class="done-icon">✅</div>
+        <h2 id="done-heading">Job Posted!</h2>
+        <p id="done-text">Your job listing is now live on StaffHook and visible to job seekers.</p>
+      </div>
+      <button class="btn-primary" onclick="window.location.href='/staffhook/my-postings'">View My Postings</button>
+    </div>
 
+  </div>
+
+  <script>
+    function showStep(n){
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-3').classList.add('hidden');
+      document.getElementById('step-4').classList.add('hidden');
+      document.getElementById('step-' + n).classList.remove('hidden');
+    }
+
+    function goToPayment(){
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const category = document.getElementById('category').value.trim();
+      const location = document.getElementById('location').value.trim();
+      const pay_rate = document.getElementById('pay_rate').value.trim();
+      const pay_type = document.getElementById('pay_type').value;
+
+      const errorDiv = document.getElementById('step1-error');
+
+      if (!title || !description || !category || !location || !pay_rate || !pay_type) {
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      errorDiv.classList.add('hidden');
+      showStep(2);
+    }
+
+    function copyAccount(){
+      var acct = document.getElementById('acct-number');
+      navigator.clipboard.writeText(acct.value);
+      alert('Account number copied!');
+    }
+
+    function moveNext(current, nextId){
+      if(current.value.length >= 1){
+        document.getElementById(nextId).focus();
+      }
+    }
+
+    function verifyCodeAndPost(){
+      var code = document.getElementById('c1').value
+        + document.getElementById('c2').value
+        + document.getElementById('c3').value
+        + document.getElementById('c4').value;
+
+      const errorDiv = document.getElementById('code-error');
+
+      if(code.length < 4){
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      errorDiv.classList.add('hidden');
+
+      const verifyBtn = document.getElementById('verify-btn');
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Posting Job...';
+
+      const payload = {
+        title: document.getElementById('title').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        category: document.getElementById('category').value.trim(),
+        location: document.getElementById('location').value.trim(),
+        pay_rate: document.getElementById('pay_rate').value.trim(),
+        pay_type: document.getElementById('pay_type').value
+      };
+
+      fetch('/staffhook/post-job', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+      })
+      .then(response => response.json().then(data => ({ status: response.status, body: data })))
+      .then(result => {
+          if (result.status === 201) {
+              showStep(4);
+          } else {
+              document.getElementById('done-heading').textContent = 'Something went wrong';
+              document.getElementById('done-text').textContent = result.body.error || 'Please try again.';
+              showStep(4);
+              verifyBtn.disabled = false;
+              verifyBtn.textContent = 'Verify Code & Post Job';
+          }
+      })
+      .catch(() => {
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = 'Verify Code & Post Job';
+          alert('Something went wrong. Please try again.');
+      });
+    }
+  </script>
 </body>
 </html>
