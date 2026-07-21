@@ -24,13 +24,27 @@ def home():
 def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
-    return render_template('dashboard.html')
 
-@app.route('/bettertrust')
-def bettertrust():
-    if 'user_id' not in session:
-        return redirect('/login')
-    return render_template('bettertrust.html')
+    conn = get_db_connection()
+
+    new_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        JOIN jobs ON applications.job_id = jobs.id
+        WHERE jobs.employer_id = ? AND applications.viewed_by_employer = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    accepted_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        WHERE applicant_id = ? AND status = 'accepted' AND viewed_by_applicant = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    conn.close()
+
+    staffhook_notifications = new_applications + accepted_applications
+
+    return render_template('dashboard.html', staffhook_notifications=staffhook_notifications)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -144,9 +158,29 @@ def find_jobs():
     jobs = conn.execute('''
         SELECT * FROM jobs WHERE status = 'open' ORDER BY created_at DESC
     ''').fetchall()
+
+    new_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        JOIN jobs ON applications.job_id = jobs.id
+        WHERE jobs.employer_id = ? AND applications.viewed_by_employer = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    accepted_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        WHERE applicant_id = ? AND status = 'accepted' AND viewed_by_applicant = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
     conn.close()
 
-    return render_template('find-jobs.html', jobs=jobs, current_user_id=session['user_id'])
+    return render_template(
+        'find-jobs.html',
+        jobs=jobs,
+        current_user_id=session['user_id'],
+        new_applications=new_applications,
+        accepted_applications=accepted_applications
+    )
 
 @app.route('/staffhook/apply/<int:job_id>', methods=['POST'])
 def apply_to_job(job_id):
@@ -206,6 +240,13 @@ def my_applications():
         WHERE applications.applicant_id = ?
         ORDER BY applications.applied_at DESC
     ''', (session['user_id'],)).fetchall()
+
+    conn.execute('''
+        UPDATE applications
+        SET viewed_by_applicant = 1
+        WHERE applicant_id = ? AND status = 'accepted'
+    ''', (session['user_id'],))
+    conn.commit()
     conn.close()
 
     return render_template('my-applications.html', applications=applications)
@@ -236,6 +277,12 @@ def my_postings():
         ''', (job['id'],)).fetchall()
         jobs_with_applicants.append({'job': job, 'applicants': applicants})
 
+    conn.execute('''
+        UPDATE applications
+        SET viewed_by_employer = 1
+        WHERE job_id IN (SELECT id FROM jobs WHERE employer_id = ?)
+    ''', (session['user_id'],))
+    conn.commit()
     conn.close()
 
     return render_template('my-postings.html', jobs_with_applicants=jobs_with_applicants)

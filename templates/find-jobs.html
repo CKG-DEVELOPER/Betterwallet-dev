@@ -207,6 +207,25 @@
         </div>
     </div>
 
+    {% if new_applications and new_applications > 0 or accepted_applications and accepted_applications > 0 %}
+    <div style="background-color:#111111;border:1px solid #00ff88;border-radius:12px;padding:14px;margin-bottom:16px;">
+        {% if new_applications and new_applications > 0 %}
+        <div style="font-size:14px;color:#00ff88;font-weight:600;margin-bottom:6px;">
+            <a href="/staffhook/my-postings" style="color:#00ff88;text-decoration:none;">
+                You have {{ new_applications }} new application{{ 's' if new_applications != 1 else '' }} on your posted jobs →
+            </a>
+        </div>
+        {% endif %}
+        {% if accepted_applications and accepted_applications > 0 %}
+        <div style="font-size:14px;color:#00ff88;font-weight:600;">
+            <a href="/staffhook/my-applications" style="color:#00ff88;text-decoration:none;">
+                {{ accepted_applications }} of your application{{ 's' if accepted_applications != 1 else '' }} got accepted →
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <div class="tabs">
         <div class="tab active">Find Jobs</div>
         <a href="/staffhook/post-job" class="tab">Post a Job</a>
