@@ -7,6 +7,11 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def _column_exists(conn, table, column):
+    cursor = conn.execute(f"PRAGMA table_info({table})")
+    columns = [row['name'] for row in cursor.fetchall()]
+    return column in columns
+
 def init_db():
     conn = get_db_connection()
     conn.execute('''
@@ -19,11 +24,16 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    if not _column_exists(conn, 'users', 'profile_photo'):
+        conn.execute('ALTER TABLE users ADD COLUMN profile_photo TEXT')
+
     conn.commit()
     conn.close()
 
 def init_staffhook_tables():
     conn = get_db_connection()
+
     conn.execute('''
         CREATE TABLE IF NOT EXISTS jobs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,6 +49,7 @@ def init_staffhook_tables():
             FOREIGN KEY (employer_id) REFERENCES users (id)
         )
     ''')
+
     conn.execute('''
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,6 +62,31 @@ def init_staffhook_tables():
             FOREIGN KEY (applicant_id) REFERENCES users (id)
         )
     ''')
+
+    if not _column_exists(conn, 'applications', 'viewed_by_employer'):
+        conn.execute('ALTER TABLE applications ADD COLUMN viewed_by_employer INTEGER DEFAULT 0')
+    if not _column_exists(conn, 'applications', 'viewed_by_applicant'):
+        conn.execute('ALTER TABLE applications ADD COLUMN viewed_by_applicant INTEGER DEFAULT 0')
+
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS worker_listings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            full_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            skill TEXT NOT NULL,
+            bio TEXT,
+            location TEXT NOT NULL,
+            photo TEXT,
+            is_featured INTEGER DEFAULT 0,
+            is_admin_posted INTEGER DEFAULT 0,
+            verified_by_betterwallet INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 

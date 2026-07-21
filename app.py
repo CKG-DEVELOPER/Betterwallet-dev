@@ -128,12 +128,12 @@ def post_job():
     conn = get_db_connection()
     conn.execute('''
         INSERT INTO jobs (employer_id, title, description, category, location, pay_rate, pay_type, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment')
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'open')
     ''', (session['user_id'], title, description, category, location, pay_rate, pay_type))
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Job submitted. It will go live once payment is confirmed."}), 201
+    return jsonify({"message": "Job posted successfully and is now live on StaffHook."}), 201
 
 @app.route('/staffhook/jobs')
 def find_jobs():
@@ -273,43 +273,6 @@ def update_application_status(application_id):
     conn.close()
 
     return jsonify({"message": f"Application {new_status} successfully."}), 200
-
-@app.route('/staffhook/admin/pending-jobs')
-def admin_pending_jobs():
-    if 'user_id' not in session:
-        return redirect('/login')
-
-    admin_email = os.getenv('ADMIN_EMAIL', '')
-    if session.get('user_email', '').lower() != admin_email.lower():
-        return "Access denied. Admins only.", 403
-
-    conn = get_db_connection()
-    jobs = conn.execute('''
-        SELECT jobs.*, users.name AS employer_name, users.email AS employer_email
-        FROM jobs
-        JOIN users ON jobs.employer_id = users.id
-        WHERE jobs.status = 'pending_payment'
-        ORDER BY jobs.created_at ASC
-    ''').fetchall()
-    conn.close()
-
-    return render_template('admin-pending-jobs.html', jobs=jobs)
-
-@app.route('/staffhook/admin/approve-job/<int:job_id>', methods=['POST'])
-def admin_approve_job(job_id):
-    if 'user_id' not in session:
-        return jsonify({"error": "You must be logged in."}), 401
-
-    admin_email = os.getenv('ADMIN_EMAIL', '')
-    if session.get('user_email', '').lower() != admin_email.lower():
-        return jsonify({"error": "Access denied."}), 403
-
-    conn = get_db_connection()
-    conn.execute("UPDATE jobs SET status = 'open' WHERE id = ?", (job_id,))
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "Job approved and is now live."}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
