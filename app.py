@@ -257,6 +257,29 @@ def request_job():
 
     return jsonify({"message": "Your listing is now live on Request a Job."}), 201
 
+@app.route('/staffhook/upgrade-listing/<int:listing_id>', methods=['POST'])
+def upgrade_listing(listing_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    conn = get_db_connection()
+
+    listing = conn.execute('SELECT * FROM worker_listings WHERE id = ?', (listing_id,)).fetchone()
+
+    if not listing:
+        conn.close()
+        return jsonify({"error": "Listing not found."}), 404
+
+    if listing['user_id'] != session['user_id']:
+        conn.close()
+        return jsonify({"error": "You can only upgrade your own listing."}), 403
+
+    conn.execute('UPDATE worker_listings SET is_featured = 1 WHERE id = ?', (listing_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Your listing is now Featured!"}), 200
+
 @app.route('/staffhook/my-applications')
 def my_applications():
     if 'user_id' not in session:

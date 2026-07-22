@@ -119,7 +119,31 @@
       <div style="font-size:13px;color:#cfd3d2;margin-bottom:8px;line-height:1.5;">{{ worker['bio'] }}</div>
       {% endif %}
       <div style="font-size:13px;color:#00ff88;font-weight:600;">{{ worker['phone'] }}</div>
-    </div>
+
+      {% if worker['user_id'] == session['user_id'] and not worker['is_featured'] %}
+      <div style="margin-top:10px;">
+        <button onclick="toggleUpgrade({{ worker['id'] }})" style="background:none;border:1px solid #444;color:#ffc800;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;">★ Upgrade to Featured</button>
+
+        <div id="upgrade-box-{{ worker['id'] }}" style="display:none;background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:12px;margin-top:8px;">
+          <div id="upgrade-step1-{{ worker['id'] }}">
+            <div style="font-size:12px;color:#cfd3d2;margin-bottom:10px;line-height:1.5;">Pay ₦500 to get more visibility and reach quality employers faster. Your listing will show a Featured badge and appear at the top of the list.</div>
+            <div style="font-size:12px;color:#8b9290;margin-bottom:4px;">Bank: Moniepoint Microfinance Bank</div>
+            <div style="font-size:12px;color:#8b9290;margin-bottom:10px;">Account: 4000732830 (Ckg Foods)</div>
+            <button onclick="showUpgradeCodeStep({{ worker['id'] }})" style="background:#00ff88;color:#000;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">I've Made the Transfer</button>
+          </div>
+
+          <div id="upgrade-step2-{{ worker['id'] }}" style="display:none;">
+            <div style="font-size:12px;color:#cfd3d2;margin-bottom:10px;line-height:1.5;">Enter the 4-digit code sent to your phone to confirm payment.</div>
+            <input type="text" maxlength="4" id="upgrade-code-{{ worker['id'] }}" placeholder="0000" style="width:80px;background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:8px;color:#fff;font-size:16px;text-align:center;letter-spacing:4px;margin-bottom:10px;">
+            <br>
+            <button onclick="confirmUpgrade({{ worker['id'] }})" style="background:#00ff88;color:#000;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">Verify & Upgrade</button>
+          </div>
+
+          <div id="upgrade-status-{{ worker['id'] }}" style="font-size:12px;margin-top:8px;"></div>
+        </div>
+      </div>
+      {% endif %}
+      </div>
     {% endfor %}
   {% endif %}
 
@@ -128,6 +152,49 @@
 <script>
   function toggleForm(){
     document.getElementById('form-section').classList.toggle('open');
+  }
+
+  function toggleUpgrade(listingId){
+    const box = document.getElementById('upgrade-box-' + listingId);
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function showUpgradeCodeStep(listingId){
+    document.getElementById('upgrade-step1-' + listingId).style.display = 'none';
+    document.getElementById('upgrade-step2-' + listingId).style.display = 'block';
+  }
+
+  function confirmUpgrade(listingId){
+    const codeInput = document.getElementById('upgrade-code-' + listingId);
+    const statusDiv = document.getElementById('upgrade-status-' + listingId);
+
+    if (codeInput.value.trim().length !== 4) {
+      statusDiv.textContent = 'Please enter the 4-digit code.';
+      statusDiv.style.color = '#ff4d4d';
+      return;
+    }
+
+    statusDiv.textContent = 'Confirming...';
+    statusDiv.style.color = '#8b9290';
+
+    fetch('/staffhook/upgrade-listing/' + listingId, {
+      method: 'POST'
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(result => {
+      if (result.status === 200) {
+        statusDiv.textContent = result.body.message;
+        statusDiv.style.color = '#00ff88';
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        statusDiv.textContent = result.body.error;
+        statusDiv.style.color = '#ff4d4d';
+      }
+    })
+    .catch(() => {
+      statusDiv.textContent = 'Something went wrong. Please try again.';
+      statusDiv.style.color = '#ff4d4d';
+    });
   }
 
   function submitListing(){
