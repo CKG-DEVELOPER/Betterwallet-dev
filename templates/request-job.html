@@ -83,6 +83,13 @@
       <input type="text" id="location" placeholder="e.g. Asaba, Delta State">
     </div>
 
+    {% if is_admin %}
+    <div class="field" style="display:flex;align-items:center;gap:10px;">
+      <input type="checkbox" id="mark_verified" style="width:auto;">
+      <label style="margin:0;">Mark as "Verified by BetterWallet" (admin posting on someone's behalf)</label>
+    </div>
+    {% endif %}
+
     <div id="form-error" class="error-text" style="display:none;">Please fill in all required fields.</div>
 
     <button class="btn-primary" id="submit-btn" onclick="submitListing()">Post My Listing (Free)</button>
@@ -94,10 +101,13 @@
   {% if workers|length == 0 %}
     <div style="text-align:center;color:#888;font-size:14px;margin-top:20px;">No workers have listed themselves yet.</div>
   {% else %}
-    {% for worker in workers %}
+  {% for worker in workers %}
     <div class="worker-card">
       {% if worker['is_featured'] %}
         <span style="display:inline-block;background:rgba(255,200,0,0.15);color:#ffc800;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;margin-bottom:8px;">★ Featured</span>
+      {% endif %}
+      {% if worker['verified_by_betterwallet'] %}
+        <span style="display:inline-block;background:rgba(0,255,136,0.15);color:#00ff88;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;margin-bottom:8px;margin-left:6px;">✓ Verified by BetterWallet</span>
       {% endif %}
       <div style="font-size:16px;font-weight:700;">{{ worker['full_name'] }}</div>
       <div style="font-size:13px;color:#8b9290;margin:2px 0 8px;">{{ worker['skill'] }} · {{ worker['location'] }}</div>
@@ -135,11 +145,13 @@
 
     btn.disabled = true;
     btn.textContent = 'Posting...';
+    const markVerifiedCheckbox = document.getElementById('mark_verified');
+    const mark_verified = markVerifiedCheckbox ? markVerifiedCheckbox.checked : false;
 
     fetch('/staffhook/request-job', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ full_name, phone, skill, bio, location })
+      body: JSON.stringify({ full_name, phone, skill, bio, location, mark_verified })
     })
     .then(response => response.json().then(data => ({ status: response.status, body: data })))
     .then(result => {

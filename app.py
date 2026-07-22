@@ -223,13 +223,16 @@ def request_job():
     if 'user_id' not in session:
         return redirect('/login')
 
+    admin_email = os.getenv('ADMIN_EMAIL', '')
+    is_admin = session.get('user_email', '').lower() == admin_email.lower()
+
     if request.method == 'GET':
         conn = get_db_connection()
         workers = conn.execute('''
             SELECT * FROM worker_listings WHERE status = 'active' ORDER BY is_featured DESC, created_at DESC
         ''').fetchall()
         conn.close()
-        return render_template('request-job.html', workers=workers)
+        return render_template('request-job.html', workers=workers, is_admin=is_admin)
 
     data = request.json
     full_name = data.get('full_name', '').strip()
@@ -237,15 +240,18 @@ def request_job():
     skill = data.get('skill', '').strip()
     bio = data.get('bio', '').strip()
     location = data.get('location', '').strip()
+    mark_verified = data.get('mark_verified', False)
 
     if not full_name or not phone or not skill or not location:
         return jsonify({"error": "Name, phone, skill, and location are required."}), 400
 
+    verified_flag = 1 if (is_admin and mark_verified) else 0
+
     conn = get_db_connection()
     conn.execute('''
-        INSERT INTO worker_listings (user_id, full_name, phone, skill, bio, location, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'active')
-    ''', (session['user_id'], full_name, phone, skill, bio, location))
+        INSERT INTO worker_listings (user_id, full_name, phone, skill, bio, location, status, verified_by_betterwallet)
+        VALUES (?, ?, ?, ?, ?, ?, 'active', ?)
+    ''', (session['user_id'], full_name, phone, skill, bio, location, verified_flag))
     conn.commit()
     conn.close()
 
