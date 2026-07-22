@@ -218,6 +218,33 @@ def apply_to_job(job_id):
     conn.close()
 
     return jsonify({"message": "Application submitted successfully."}), 201
+@app.route('/staffhook/request-job', methods=['GET', 'POST'])
+def request_job():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'GET':
+        return render_template('request-job.html')
+
+    data = request.json
+    full_name = data.get('full_name', '').strip()
+    phone = data.get('phone', '').strip()
+    skill = data.get('skill', '').strip()
+    bio = data.get('bio', '').strip()
+    location = data.get('location', '').strip()
+
+    if not full_name or not phone or not skill or not location:
+        return jsonify({"error": "Name, phone, skill, and location are required."}), 400
+
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO worker_listings (user_id, full_name, phone, skill, bio, location, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'active')
+    ''', (session['user_id'], full_name, phone, skill, bio, location))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Your listing is now live on Request a Job."}), 201
 
 @app.route('/staffhook/my-applications')
 def my_applications():
