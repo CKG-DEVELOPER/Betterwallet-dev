@@ -16,6 +16,8 @@
   .tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid #2a2a2a;color:#cfd3d2;background-color:#111111;}
   .tab.active{background-color:#00ff88;color:#000000;border-color:#00ff88;}
 
+  .post-btn{display:block;width:100%;background:#111;border:1.5px solid #00ff88;color:#00ff88;border-radius:12px;padding:14px;font-size:15px;font-weight:700;margin-bottom:20px;cursor:pointer;text-align:center;}
+
   .field{margin-bottom:16px;}
   .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
   .field input, .field textarea{width:100%;background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:14px;color:#fff;font-size:14px;box-sizing:border-box;font-family:inherit;}
@@ -30,6 +32,12 @@
   .status-message.error{color:#ff4d4d;}
 
   .error-text{color:#ff4d4d;font-size:13px;margin:-10px 0 14px;}
+
+  .form-section{display:none;background-color:#0a0a0a;border:1px solid #2a2a2a;border-radius:14px;padding:18px;margin-bottom:24px;}
+  .form-section.open{display:block;}
+  .form-section h2{font-size:16px;margin:0 0 16px;}
+
+  .worker-card{background-color:#111111;border:1px solid #2a2a2a;border-radius:14px;padding:16px;margin-bottom:14px;}
 </style>
 </head>
 <body>
@@ -49,35 +57,65 @@
     <div class="tab active">Request a Job</div>
   </div>
 
-  <div class="field">
-    <label>Full Name</label>
-    <input type="text" id="full_name" placeholder="e.g. John Okoye">
-  </div>
-  <div class="field">
-    <label>Phone Number</label>
-    <input type="text" id="phone" placeholder="e.g. 08012345678">
-  </div>
-  <div class="field">
-    <label>Skill / What you do</label>
-    <input type="text" id="skill" placeholder="e.g. Painter, Cleaner, Driver">
-  </div>
-  <div class="field">
-    <label>Bio (optional)</label>
-    <textarea id="bio" placeholder="Tell employers about your experience"></textarea>
-  </div>
-  <div class="field">
-    <label>Location</label>
-    <input type="text" id="location" placeholder="e.g. Asaba, Delta State">
+  <button class="post-btn" onclick="toggleForm()">+ Request a Job (Post Yourself)</button>
+
+  <div class="form-section" id="form-section">
+    <h2>Tell employers about yourself</h2>
+
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="full_name" placeholder="e.g. John Okoye">
+    </div>
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="text" id="phone" placeholder="e.g. 08012345678">
+    </div>
+    <div class="field">
+      <label>Skill / What you do</label>
+      <input type="text" id="skill" placeholder="e.g. Painter, Cleaner, Driver">
+    </div>
+    <div class="field">
+      <label>Bio (optional)</label>
+      <textarea id="bio" placeholder="Tell employers about your experience"></textarea>
+    </div>
+    <div class="field">
+      <label>Location</label>
+      <input type="text" id="location" placeholder="e.g. Asaba, Delta State">
+    </div>
+
+    <div id="form-error" class="error-text" style="display:none;">Please fill in all required fields.</div>
+
+    <button class="btn-primary" id="submit-btn" onclick="submitListing()">Post My Listing (Free)</button>
+    <div class="status-message" id="status-message"></div>
   </div>
 
-  <div id="form-error" class="error-text" style="display:none;">Please fill in all required fields.</div>
+  <h2 style="font-size:16px;margin-bottom:14px;">Workers Available</h2>
 
-  <button class="btn-primary" id="submit-btn" onclick="submitListing()">Post My Listing (Free)</button>
-  <div class="status-message" id="status-message"></div>
+  {% if workers|length == 0 %}
+    <div style="text-align:center;color:#888;font-size:14px;margin-top:20px;">No workers have listed themselves yet.</div>
+  {% else %}
+    {% for worker in workers %}
+    <div class="worker-card">
+      {% if worker['is_featured'] %}
+        <span style="display:inline-block;background:rgba(255,200,0,0.15);color:#ffc800;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;margin-bottom:8px;">★ Featured</span>
+      {% endif %}
+      <div style="font-size:16px;font-weight:700;">{{ worker['full_name'] }}</div>
+      <div style="font-size:13px;color:#8b9290;margin:2px 0 8px;">{{ worker['skill'] }} · {{ worker['location'] }}</div>
+      {% if worker['bio'] %}
+      <div style="font-size:13px;color:#cfd3d2;margin-bottom:8px;line-height:1.5;">{{ worker['bio'] }}</div>
+      {% endif %}
+      <div style="font-size:13px;color:#00ff88;font-weight:600;">{{ worker['phone'] }}</div>
+    </div>
+    {% endfor %}
+  {% endif %}
 
 </div>
 
 <script>
+  function toggleForm(){
+    document.getElementById('form-section').classList.toggle('open');
+  }
+
   function submitListing(){
     const full_name = document.getElementById('full_name').value.trim();
     const phone = document.getElementById('phone').value.trim();

@@ -224,7 +224,12 @@ def request_job():
         return redirect('/login')
 
     if request.method == 'GET':
-        return render_template('request-job.html')
+        conn = get_db_connection()
+        workers = conn.execute('''
+            SELECT * FROM worker_listings WHERE status = 'active' ORDER BY is_featured DESC, created_at DESC
+        ''').fetchall()
+        conn.close()
+        return render_template('request-job.html', workers=workers)
 
     data = request.json
     full_name = data.get('full_name', '').strip()
