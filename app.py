@@ -113,6 +113,34 @@ def me():
         return jsonify({"logged_in": True, "name": session.get('user_name')})
     return jsonify({"logged_in": False})
 
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'GET':
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+        conn.close()
+        return render_template('profile.html', user=user)
+
+    if 'photo' not in request.files:
+        return jsonify({"error": "No photo uploaded."}), 400
+
+    photo = request.files['photo']
+    if photo.filename == '':
+        return jsonify({"error": "No photo selected."}), 400
+
+    filename = f"user_{session['user_id']}_{photo.filename}"
+    photo.save(os.path.join('static/uploads', filename))
+
+    conn = get_db_connection()
+    conn.execute('UPDATE users SET profile_photo = ? WHERE id = ?', (filename, session['user_id']))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Profile photo updated successfully.", "filename": filename}), 200
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile | BetterWallet</title>
+<style>
+  body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:0;}
+  .container{max-width:480px;margin:0 auto;padding:24px 16px 60px;box-sizing:border-box;}
+  .top-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .back-btn{width:40px;height:40px;border-radius:10px;background-color:#151515;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px;flex-shrink:0;}
+  .heading h1{font-size:20px;margin:0;}
+  .heading p{font-size:13px;color:#8b9290;margin:2px 0 0;}
+
+  .photo-circle{width:120px;height:120px;border-radius:50%;background:#111;border:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;overflow:hidden;}
+  .photo-circle img{width:100%;height:100%;object-fit:cover;}
+  .photo-circle .placeholder{font-size:40px;color:#444;}
+
+  .encourage{background-color:#0e1410;border:1px solid #1f2a22;border-radius:12px;padding:14px;margin-bottom:20px;font-size:13px;color:#9aa;line-height:1.6;text-align:center;}
+
+  .upload-label{display:block;text-align:center;background:#111;border:1.5px solid #00ff88;color:#00ff88;border-radius:999px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;}
+  input[type="file"]{display:none;}
+
+  .status-message{font-size:13px;margin-top:10px;text-align:center;}
+  .status-message.success{color:#00ff88;}
+  .status-message.error{color:#ff4d4d;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-row">
+    <a href="/dashboard" class="back-btn">←</a>
+    <div class="heading">
+      <h1>My Profile</h1>
+      <p>Manage your photo</p>
+    </div>
+  </div>
+
+  <div class="photo-circle" id="photo-circle">
+    {% if user['profile_photo'] %}
+      <img src="/static/uploads/{{ user['profile_photo'] }}" alt="Profile photo">
+    {% else %}
+      <span class="placeholder">👤</span>
+    {% endif %}
+  </div>
+
+  <div class="encourage">
+    Adding a profile photo helps employers and workers trust who they're dealing with, and makes your listings stand out.
+  </div>
+
+  <label class="upload-label" for="photo-input">Upload Profile Photo</label>
+  <input type="file" id="photo-input" accept="image/*" onchange="uploadPhoto()">
+
+  <div class="status-message" id="status-message"></div>
+
+</div>
+
+<script>
+  function uploadPhoto(){
+    const fileInput = document.getElementById('photo-input');
+    const statusDiv = document.getElementById('status-message');
+
+    if (!fileInput.files.length) return;
+
+    const formData = new FormData();
+    formData.append('photo', fileInput.files[0]);
+
+    statusDiv.textContent = 'Uploading...';
+    statusDiv.className = 'status-message';
+
+    fetch('/profile', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(result => {
+      if (result.status === 200) {
+        statusDiv.textContent = result.body.message;
+        statusDiv.className = 'status-message success';
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        statusDiv.textContent = result.body.error;
+        statusDiv.className = 'status-message error';
+      }
+    })
+    .catch(() => {
+      statusDiv.textContent = 'Something went wrong. Please try again.';
+      statusDiv.className = 'status-message error';
+    });
+  }
+</script>
+
+</body>
+</html>
