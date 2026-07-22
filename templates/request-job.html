@@ -113,7 +113,17 @@
       {% if worker['verified_by_betterwallet'] %}
         <span style="display:inline-block;background:rgba(0,255,136,0.15);color:#00ff88;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;margin-bottom:8px;margin-left:6px;">✓ Verified by BetterWallet</span>
       {% endif %}
-      <div style="font-size:16px;font-weight:700;">{{ worker['full_name'] }}</div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:#0a0a0a;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          {% if worker['user_photo'] %}
+            <img src="/static/uploads/{{ worker['user_photo'] }}" style="width:100%;height:100%;object-fit:cover;">
+          {% else %}
+            <span style="font-size:11px;color:#666;">👤</span>
+          {% endif %}
+        </div>
+        <div style="font-size:16px;font-weight:700;">{{ worker['full_name'] }}</div>
+      </div>
       <div style="font-size:13px;color:#8b9290;margin:2px 0 8px;">{{ worker['skill'] }} · {{ worker['location'] }}</div>
       {% if worker['bio'] %}
       <div style="font-size:13px;color:#cfd3d2;margin-bottom:8px;line-height:1.5;">{{ worker['bio'] }}</div>

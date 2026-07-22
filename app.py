@@ -40,11 +40,13 @@ def dashboard():
         WHERE applicant_id = ? AND status = 'accepted' AND viewed_by_applicant = 0
     ''', (session['user_id'],)).fetchone()['count']
 
+    user = conn.execute('SELECT profile_photo FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+
     conn.close()
 
     staffhook_notifications = new_applications + accepted_applications
 
-    return render_template('dashboard.html', staffhook_notifications=staffhook_notifications)
+    return render_template('dashboard.html', staffhook_notifications=staffhook_notifications, user_photo=user['profile_photo'] if user else None)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -181,10 +183,14 @@ def post_job():
 def find_jobs():
     if 'user_id' not in session:
         return redirect('/login')
-
+    
     conn = get_db_connection()
     jobs = conn.execute('''
-        SELECT * FROM jobs WHERE status = 'open' ORDER BY created_at DESC
+        SELECT jobs.*, users.name AS employer_name, users.profile_photo AS employer_photo
+        FROM jobs
+        LEFT JOIN users ON jobs.employer_id = users.id
+        WHERE jobs.status = 'open'
+        ORDER BY jobs.created_at DESC
     ''').fetchall()
 
     new_applications = conn.execute('''
@@ -246,6 +252,7 @@ def apply_to_job(job_id):
     conn.close()
 
     return jsonify({"message": "Application submitted successfully."}), 201
+
 @app.route('/staffhook/request-job', methods=['GET', 'POST'])
 def request_job():
     if 'user_id' not in session:
@@ -257,7 +264,11 @@ def request_job():
     if request.method == 'GET':
         conn = get_db_connection()
         workers = conn.execute('''
-            SELECT * FROM worker_listings WHERE status = 'active' ORDER BY is_featured DESC, created_at DESC
+            SELECT worker_listings.*, users.profile_photo AS user_photo
+            FROM worker_listings
+            LEFT JOIN users ON worker_listings.user_id = users.id
+            WHERE worker_listings.status = 'active'
+            ORDER BY worker_listings.is_featured DESC, worker_listings.created_at DESC
         ''').fetchall()
         conn.close()
         return render_template('request-job.html', workers=workers, is_admin=is_admin)
