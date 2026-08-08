@@ -183,7 +183,7 @@ def post_job():
 def find_jobs():
     if 'user_id' not in session:
         return redirect('/login')
-    
+
     conn = get_db_connection()
     jobs = conn.execute('''
         SELECT jobs.*, users.name AS employer_name, users.profile_photo AS employer_photo
@@ -334,9 +334,13 @@ def my_applications():
                jobs.category,
                jobs.location,
                jobs.pay_rate,
-               jobs.pay_type
+               jobs.pay_type,
+               users.name AS employer_name,
+               users.phone AS employer_phone,
+               users.email AS employer_email
         FROM applications
         JOIN jobs ON applications.job_id = jobs.id
+        JOIN users ON jobs.employer_id = users.id
         WHERE applications.applicant_id = ?
         ORDER BY applications.applied_at DESC
     ''', (session['user_id'],)).fetchall()

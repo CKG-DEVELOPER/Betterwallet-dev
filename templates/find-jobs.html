@@ -68,6 +68,20 @@
             border-color: #00ff88;
         }
 
+        .request-job-link {
+            display: block;
+            text-align: center;
+            font-size: 13px;
+            color: #00ff88;
+            text-decoration: none;
+            background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
         .job-card {
             background-color: #111111;
             border: 1px solid #2a2a2a;
@@ -211,6 +225,8 @@
         ⚠️ Important: Never send or ask for money before a job starts. No transport fees, no advance payments. Arrange directly and meet in person.
     </div>
 
+    <a href="/staffhook/request-job" class="request-job-link">Looking for work instead of applying? Request a Job →</a>
+
     {% if new_applications and new_applications > 0 or accepted_applications and accepted_applications > 0 %}
     <div style="background-color:#111111;border:1px solid #00ff88;border-radius:12px;padding:14px;margin-bottom:16px;">
         {% if new_applications and new_applications > 0 %}
@@ -233,7 +249,7 @@
     <div class="tabs">
         <div class="tab active">Find Jobs</div>
         <a href="/staffhook/post-job" class="tab">Post a Job</a>
-        <a href="/staffhook/request-job" class="tab">Request a Job</a>
+        <a href="/staffhook/my-postings" class="tab">My Postings</a>
     </div>
 
     {% if jobs|length == 0 %}
