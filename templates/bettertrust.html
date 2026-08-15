@@ -81,25 +81,26 @@
       </div>
       <div class="field">
         <label>Full Name</label>
-        <input type="text" placeholder="e.g. Chinedu Kalu">
+        <input type="text" id="bt-full-name" placeholder="e.g. Chinedu Kalu">
       </div>
       <div class="field">
         <label>Business Name</label>
-        <input type="text" placeholder="Registered or trading name">
+        <input type="text" id="bt-business-name" placeholder="Registered or trading name">
       </div>
       <div class="field">
         <label>Phone Number</label>
-        <input type="text" placeholder="0800 000 0000">
+        <input type="text" id="bt-phone" placeholder="0800 000 0000">
       </div>
       <div class="field">
         <label>Email Address</label>
-        <input type="email" placeholder="you@email.com">
+        <input type="email" id="bt-email" placeholder="you@email.com">
       </div>
       <div class="field">
         <label>Physical Address</label>
-        <input type="text" placeholder="Street, city, state">
+        <input type="text" id="bt-address" placeholder="Street, city, state">
       </div>
-      <button class="btn-primary" onclick="showStep(2)">Continue</button>
+      <div id="bt-step1-error" class="error-text hidden" style="color:#ff4d4d;font-size:13px;margin:-12px 0 16px;">All fields are required.</div>
+      <button class="btn-primary" id="bt-continue-btn" onclick="saveDetailsAndContinue()">Continue</button>
     </div>
 
     <!-- STEP 2: DOCS -->
@@ -118,15 +119,21 @@
       <div class="step-labels">
         <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
       </div>
-      <div class="upload-box" onclick="alert('File picker coming soon!')">
-        <p>📄 Upload ID Document (NIN, License, or Passport)</p>
+      <div class="upload-box" onclick="document.getElementById('bt-id-input').click()">
+        <p id="bt-id-label">📄 Upload ID Document (NIN, License, or Passport)</p>
       </div>
-      <div class="upload-box" onclick="alert('File picker coming soon!')">
-        <p>🏢 Upload Proof of Business (CAC certificate, optional)</p>
+      <input type="file" id="bt-id-input" class="hidden" accept="image/*,.pdf" onchange="uploadDocument(this, 'id_document', 'bt-id-label')">
+
+      <div class="upload-box" onclick="document.getElementById('bt-business-input').click()">
+        <p id="bt-business-label">🏢 Upload Proof of Business (CAC certificate, optional)</p>
       </div>
-      <div class="upload-box" onclick="alert('File picker coming soon!')">
-        <p>🤳 Upload Selfie Holding ID</p>
+      <input type="file" id="bt-business-input" class="hidden" accept="image/*,.pdf" onchange="uploadDocument(this, 'business_document', 'bt-business-label')">
+
+      <div class="upload-box" onclick="document.getElementById('bt-selfie-input').click()">
+        <p id="bt-selfie-label">🤳 Upload Selfie Holding ID</p>
       </div>
+      <input type="file" id="bt-selfie-input" class="hidden" accept="image/*" onchange="uploadDocument(this, 'selfie_document', 'bt-selfie-label')">
+
       <button class="btn-primary" onclick="showStep(3)">Continue</button>
     </div>
 
@@ -146,26 +153,12 @@
       <div class="step-labels">
         <span>Details</span><span>Docs</span><span>Pay</span><span>Code</span><span>Done</span>
       </div>
-      <div class="banner">
+<div class="banner">
         <h2>Verification Fee</h2>
-        <p>A monthly fee of ₦2,500 keeps your verified badge active. Transfer to the account below, then tap "I've Made the Transfer."</p>
+        <p>A monthly fee of ₦2,500 keeps your verified badge active. Tap below to pay securely by card, bank transfer, or USSD.</p>
       </div>
-      <div class="field">
-        <label>Bank Name</label>
-        <input type="text" value="Moniepoint Microfinance Bank" readonly>
-      </div>
-      <div class="field">
-        <label>Account Number</label>
-        <div class="field-copy">
-          <input type="text" id="acct-number" value="4000732830" readonly>
-          <button class="copy-btn" onclick="copyAccount()">Copy</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Account Name</label>
-        <input type="text" value="Ckg Foods" readonly>
-      </div>
-      <button class="btn-primary" onclick="showStep(4)">I've Made the Transfer</button>
+      <div id="bt-payment-error" class="error-text hidden" style="color:#ff4d4d;font-size:13px;margin:-12px 0 16px;"></div>
+      <button class="btn-primary" id="bt-pay-btn" onclick="bettertrustStartPayment()">Pay ₦2,500 & Continue</button>
     </div>
 
     <!-- STEP 4: CODE -->
@@ -186,15 +179,18 @@
       </div>
       <div class="banner">
         <h2>Enter Verification Code</h2>
-        <p>We've sent a 4-digit code to your phone number. Enter it below to confirm your identity.</p>
+        <p>We've sent a 6-digit code to your phone number. Enter it below to confirm your identity.</p>
       </div>
       <div class="code-inputs">
-        <input type="number" maxlength="1" id="c1" oninput="moveNext(this,'c2')">
-        <input type="number" maxlength="1" id="c2" oninput="moveNext(this,'c3')">
-        <input type="number" maxlength="1" id="c3" oninput="moveNext(this,'c4')">
-        <input type="number" maxlength="1" id="c4">
+        <input type="number" maxlength="1" id="bt-c1" oninput="moveNext(this,'bt-c2')">
+        <input type="number" maxlength="1" id="bt-c2" oninput="moveNext(this,'bt-c3')">
+        <input type="number" maxlength="1" id="bt-c3" oninput="moveNext(this,'bt-c4')">
+        <input type="number" maxlength="1" id="bt-c4" oninput="moveNext(this,'bt-c5')">
+        <input type="number" maxlength="1" id="bt-c5" oninput="moveNext(this,'bt-c6')">
+        <input type="number" maxlength="1" id="bt-c6">
       </div>
-      <button class="btn-primary" onclick="verifyCode()">Verify Code</button>
+      <div id="bt-code-error" class="error-text hidden" style="color:#ff4d4d;font-size:13px;margin:-12px 0 16px;"></div>
+      <button class="btn-primary" id="bt-verify-btn" onclick="verifyCode()">Verify Code</button>
     </div>
 
     <!-- STEP 5: DONE -->
@@ -224,6 +220,123 @@
   </div>
 
   <script>
+
+    window.addEventListener('DOMContentLoaded', function() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'verified') {
+        showStep(4);
+        fetch('/send-otp', { method: 'POST' });
+      }
+    });
+
+function bettertrustStartPayment(){
+      const btn = document.getElementById('bt-pay-btn');
+      const errorDiv = document.getElementById('bt-payment-error');
+      btn.disabled = true;
+      btn.textContent = 'Starting payment...';
+      errorDiv.classList.add('hidden');
+
+      fetch('/bettertrust/initiate-payment', { method: 'POST' })
+      .then(response => response.json().then(data => ({ status: response.status, body: data })))
+      .then(result => {
+          if (result.status === 200) {
+              window.location.href = result.body.payment_link;
+          } else {
+              errorDiv.textContent = result.body.error || 'Could not start payment. Please try again.';
+              errorDiv.classList.remove('hidden');
+              btn.disabled = false;
+              btn.textContent = 'Pay ₦2,500 & Continue';
+          }
+      })
+      .catch(() => {
+          errorDiv.textContent = 'Something went wrong. Please try again.';
+          errorDiv.classList.remove('hidden');
+          btn.disabled = false;
+          btn.textContent = 'Pay ₦2,500 & Continue';
+      });
+    }
+
+    function uploadDocument(input, docType, labelId){
+      const file = input.files[0];
+      if (!file) return;
+
+      const label = document.getElementById(labelId);
+      const originalText = label.textContent;
+      label.textContent = 'Uploading...';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('doc_type', docType);
+
+      fetch('/bettertrust/upload-document', {
+          method: 'POST',
+          body: formData
+      })
+      .then(response => response.json().then(data => ({ status: response.status, body: data })))
+      .then(result => {
+          if (result.status === 200) {
+              label.textContent = '✅ ' + file.name;
+          } else {
+              label.textContent = originalText;
+              alert(result.body.error || 'Upload failed. Please try again.');
+          }
+      })
+      .catch(() => {
+          label.textContent = originalText;
+          alert('Something went wrong. Please try again.');
+      });
+    }
+
+    function saveDetailsAndContinue(){
+      const fullName = document.getElementById('bt-full-name').value.trim();
+      const businessName = document.getElementById('bt-business-name').value.trim();
+      const phone = document.getElementById('bt-phone').value.trim();
+      const email = document.getElementById('bt-email').value.trim();
+      const address = document.getElementById('bt-address').value.trim();
+
+      const errorDiv = document.getElementById('bt-step1-error');
+
+      if (!fullName || !businessName || !phone || !email || !address) {
+        errorDiv.textContent = 'All fields are required.';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      errorDiv.classList.add('hidden');
+
+      const btn = document.getElementById('bt-continue-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      fetch('/bettertrust', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              full_name: fullName,
+              business_name: businessName,
+              phone: phone,
+              email: email,
+              address: address
+          })
+      })
+      .then(response => response.json().then(data => ({ status: response.status, body: data })))
+      .then(result => {
+          btn.disabled = false;
+          btn.textContent = 'Continue';
+
+          if (result.status === 201) {
+              showStep(2);
+          } else {
+              errorDiv.textContent = result.body.error || 'Something went wrong. Please try again.';
+              errorDiv.classList.remove('hidden');
+          }
+      })
+      .catch(() => {
+          btn.disabled = false;
+          btn.textContent = 'Continue';
+          errorDiv.textContent = 'Something went wrong. Please try again.';
+          errorDiv.classList.remove('hidden');
+      });
+    }
     function showStep(n){
       document.getElementById('step-landing').classList.add('hidden');
       document.getElementById('step-1').classList.add('hidden');
@@ -247,15 +360,49 @@
     }
 
     function verifyCode(){
-      var code = document.getElementById('c1').value
-        + document.getElementById('c2').value
-        + document.getElementById('c3').value
-        + document.getElementById('c4').value;
-      if(code.length < 4){
-        alert('Please enter all 4 digits.');
+      var code = document.getElementById('bt-c1').value
+        + document.getElementById('bt-c2').value
+        + document.getElementById('bt-c3').value
+        + document.getElementById('bt-c4').value
+        + document.getElementById('bt-c5').value
+        + document.getElementById('bt-c6').value;
+
+      const errorDiv = document.getElementById('bt-code-error');
+
+      if(code.length < 6){
+        errorDiv.textContent = 'Please enter all 6 digits.';
+        errorDiv.classList.remove('hidden');
         return;
       }
-      showStep(5);
+      errorDiv.classList.add('hidden');
+
+      const verifyBtn = document.getElementById('bt-verify-btn');
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verifying...';
+
+      fetch('/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp_code: code })
+      })
+      .then(response => response.json().then(data => ({ status: response.status, body: data })))
+      .then(result => {
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = 'Verify Code';
+
+          if (result.status === 200) {
+              showStep(5);
+          } else {
+              errorDiv.textContent = result.body.error || 'Incorrect code. Please try again.';
+              errorDiv.classList.remove('hidden');
+          }
+      })
+      .catch(() => {
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = 'Verify Code';
+          errorDiv.textContent = 'Something went wrong. Please try again.';
+          errorDiv.classList.remove('hidden');
+      });
     }
   </script>
 </body>

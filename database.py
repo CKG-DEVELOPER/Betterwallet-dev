@@ -12,6 +12,32 @@ def _column_exists(conn, table, column):
     columns = [row['name'] for row in cursor.fetchall()]
     return column in columns
 
+def init_bettertrust_tables():
+    conn = get_db_connection()
+
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS verification_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            full_name TEXT NOT NULL,
+            business_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            email TEXT NOT NULL,
+            address TEXT NOT NULL,
+            id_document TEXT,
+            business_document TEXT,
+            selfie_document TEXT,
+            payment_status TEXT DEFAULT 'pending',
+            verification_status TEXT DEFAULT 'pending',
+            admin_notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
 def init_db():
     conn = get_db_connection()
     conn.execute('''
@@ -93,4 +119,5 @@ def init_staffhook_tables():
 if __name__ == '__main__':
     init_db()
     init_staffhook_tables()
+    init_bettertrust_tables()
     print("Database initialized successfully.")

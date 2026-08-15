@@ -3,11 +3,15 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import random
+import time
+import requests
 
 load_dotenv()
 
 from chatbot import get_chat_reply
-from database import get_db_connection, init_db, init_staffhook_tables
+
+from database import get_db_connection, init_db, init_staffhook_tables, init_bettertrust_tables
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
@@ -15,6 +19,214 @@ CORS(app, supports_credentials=True)
 
 init_db()
 init_staffhook_tables()
+init_bettertrust_tables()
+
+@app.route('/cac')
+def cac_hub():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    return render_template('cac.html')
+
+@app.route('/bettertrust/admin')
+def bettertrust_admin():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    admin_email = os.getenv('ADMIN_EMAIL', '')
+    is_admin = session.get('user_email', '').lower() == admin_email.lower()
+
+    if not is_admin:
+        return jsonify({"error": "You are not authorized to view this page."}), 403
+
+    conn = get_db_connection()
+    verifications = conn.execute('''
+        SELECT * FROM verification_requests
+        WHERE verification_status = 'pending'
+        ORDER BY created_at DESC
+    ''').fetchall()
+    conn.close()
+
+    return render_template('bettertrust-admin.html', verifications=verifications)
+
+@app.route('/bettertrust/admin/update/<int:verification_id>', methods=['POST'])
+def bettertrust_admin_update(verification_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    admin_email = os.getenv('ADMIN_EMAIL', '')
+    is_admin = session.get('user_email', '').lower() == admin_email.lower()
+
+    if not is_admin:
+        return jsonify({"error": "You are not authorized to do this."}), 403
+
+    data = request.json
+    new_status = data.get('status', '').strip()
+
+    if new_status not in ('approved', 'rejected'):
+        return jsonify({"error": "Invalid status."}), 400
+
+    conn = get_db_connection()
+    conn.execute(
+        'UPDATE verification_requests SET verification_status = ? WHERE id = ?',
+        (new_status, verification_id)
+    )
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": f"Verification {new_status}."}), 200
+
+@app.route('/bettertrust/verify-payment')
+def bettertrust_verify_payment():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    status = request.args.get('status')
+    tx_ref = request.args.get('tx_ref')
+    transaction_id = request.args.get('transaction_id')
+
+    verification_id = session.get('pending_verification_id')
+
+    if status not in ('successful', 'completed') or not transaction_id:
+        return render_template('payment-failed.html')
+
+    if session.get('bettertrust_pending_tx_ref') != tx_ref:
+        return render_template('payment-failed.html')
+
+    flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
+
+    response = requests.get(
+        f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify',
+        headers={"Authorization": f"Bearer {flw_secret_key}"}
+    )
+
+    data = response.json()
+
+    if data.get('status') != 'success':
+        return render_template('payment-failed.html')
+
+    tx_data = data['data']
+
+    if tx_data['status'] not in ('successful', 'completed'):
+        return render_template('payment-failed.html')
+
+    if tx_data['amount'] < 2500:
+        return render_template('payment-failed.html')
+
+    if tx_data['currency'] != 'NGN':
+        return render_template('payment-failed.html')
+
+    conn = get_db_connection()
+    conn.execute('UPDATE verification_requests SET payment_status = ? WHERE id = ?', ('paid', verification_id))
+    conn.commit()
+    conn.close()
+
+    session.pop('bettertrust_pending_tx_ref', None)
+
+    return redirect('/bettertrust?payment=verified')
+
+@app.route('/bettertrust/initiate-payment', methods=['POST'])
+def bettertrust_initiate_payment():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    verification_id = session.get('pending_verification_id')
+    if not verification_id:
+        return jsonify({"error": "No verification in progress. Please start over."}), 400
+
+    flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
+    tx_ref = f"bettertrust-{session['user_id']}-{int(time.time())}"
+
+    session['bettertrust_pending_tx_ref'] = tx_ref
+
+    response = requests.post(
+        'https://api.flutterwave.com/v3/payments',
+        headers={"Authorization": f"Bearer {flw_secret_key}"},
+        json={
+            "tx_ref": tx_ref,
+            "amount": "2500",
+            "currency": "NGN",
+            "redirect_url": "http://127.0.0.1:5000/bettertrust/verify-payment",
+            "customer": {
+                "email": session.get('user_email', 'test@betterwallet.com')
+            },
+            "customizations": {
+                "title": "BetterWallet Better-Trust",
+                "description": "Seller verification fee"
+            }
+        }
+    )
+
+    data = response.json()
+
+    if data.get('status') != 'success':
+        print("FLUTTERWAVE ERROR:", data)
+        return jsonify({"error": "Could not start payment. Please try again."}), 500
+
+    payment_link = data['data']['link']
+    return jsonify({"payment_link": payment_link}), 200
+
+@app.route('/bettertrust', methods=['GET', 'POST'])
+def bettertrust():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'GET':
+        return render_template('bettertrust.html')
+
+    data = request.json
+    full_name = data.get('full_name', '').strip()
+    business_name = data.get('business_name', '').strip()
+    phone = data.get('phone', '').strip()
+    email = data.get('email', '').strip()
+    address = data.get('address', '').strip()
+
+    if not full_name or not business_name or not phone or not email or not address:
+        return jsonify({"error": "All fields are required."}), 400
+
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO verification_requests (user_id, full_name, business_name, phone, email, address)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (session['user_id'], full_name, business_name, phone, email, address))
+    conn.commit()
+
+    new_id = conn.execute('SELECT last_insert_rowid() AS id').fetchone()['id']
+    conn.close()
+
+    session['pending_verification_id'] = new_id
+
+    return jsonify({"message": "Details saved.", "verification_id": new_id}), 201
+
+@app.route('/bettertrust/upload-document', methods=['POST'])
+def bettertrust_upload_document():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    verification_id = session.get('pending_verification_id')
+    if not verification_id:
+        return jsonify({"error": "No verification in progress. Please start over."}), 400
+
+    doc_type = request.form.get('doc_type')
+    if doc_type not in ('id_document', 'business_document', 'selfie_document'):
+        return jsonify({"error": "Invalid document type."}), 400
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded."}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected."}), 400
+
+    filename = f"verify_{verification_id}_{doc_type}_{file.filename}"
+    file.save(os.path.join('static/uploads', filename))
+
+    conn = get_db_connection()
+    conn.execute(f'UPDATE verification_requests SET {doc_type} = ? WHERE id = ?', (filename, verification_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Document uploaded.", "filename": filename}), 200
 
 @app.route('/')
 def home():
@@ -103,6 +315,158 @@ def login():
     session['user_email'] = user['email']
 
     return jsonify({"message": "Login successful."}), 200
+
+@app.route('/staffhook/initiate-payment', methods=['POST'])
+def initiate_payment():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
+    tx_ref = f"staffhook-{session['user_id']}-{int(time.time())}"
+
+    session['pending_tx_ref'] = tx_ref
+
+    response = requests.post(
+        'https://api.flutterwave.com/v3/payments',
+        headers={"Authorization": f"Bearer {flw_secret_key}"},
+        json={
+            "tx_ref": tx_ref,
+            "amount": "2500",
+            "currency": "NGN",
+            "redirect_url": "http://127.0.0.1:5000/staffhook/verify-payment",
+            "customer": {
+                "email": session.get('user_email', 'test@betterwallet.com')
+            },
+            "customizations": {
+                "title": "BetterWallet StaffHook",
+                "description": "Job posting fee"
+            }
+        }
+    )
+
+    data = response.json()
+
+    if data.get('status') != 'success':
+        print("FLUTTERWAVE ERROR:", data)
+        return jsonify({"error": "Could not start payment. Please try again."}), 500
+
+    payment_link = data['data']['link']
+    return jsonify({"payment_link": payment_link}), 200
+
+@app.route('/staffhook/verify-payment')
+def verify_payment():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    status = request.args.get('status')
+    tx_ref = request.args.get('tx_ref')
+    transaction_id = request.args.get('transaction_id')
+
+    if status not in ('successful', 'completed') or not transaction_id:
+        return render_template('payment-failed.html')
+
+    if session.get('pending_tx_ref') != tx_ref:
+        return render_template('payment-failed.html')
+
+    flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
+
+    response = requests.get(
+        f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify',
+        headers={"Authorization": f"Bearer {flw_secret_key}"}
+    )
+
+    data = response.json()
+
+    if data.get('status') != 'success':
+        return render_template('payment-failed.html')
+
+    tx_data = data['data']
+
+    if tx_data['status'] not in ('successful', 'completed'):
+        return render_template('payment-failed.html')
+
+    if tx_data['amount'] < 2500:
+        return render_template('payment-failed.html')
+
+    if tx_data['currency'] != 'NGN':
+        return render_template('payment-failed.html')
+
+    session['payment_verified'] = True
+    session.pop('pending_tx_ref', None)
+
+    return redirect('/staffhook/post-job?payment=verified')
+
+@app.route('/send-otp', methods=['POST'])
+def send_otp():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT phone FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    conn.close()
+
+    if not user or not user['phone']:
+        return jsonify({"error": "No phone number found on your account."}), 400
+
+    otp_code = str(random.randint(100000, 999999))
+
+    raw_phone = user['phone'].strip()
+    if raw_phone.startswith('0'):
+        formatted_phone = '234' + raw_phone[1:]
+    elif raw_phone.startswith('+234'):
+        formatted_phone = raw_phone[1:]
+    else:
+        formatted_phone = raw_phone
+
+    session['otp_code'] = otp_code
+    session['otp_expires_at'] = time.time() + 300  # 5 minutes from now
+    session['otp_phone'] = user['phone']
+
+    termii_api_key = os.getenv('TERMII_API_KEY')
+    print("TERMII KEY LOADED:", repr(termii_api_key))
+
+    response = requests.post('https://api.ng.termii.com/api/sms/send', json={
+        "to": formatted_phone,
+        "from": "Termii",
+        "sms": f"Your BetterWallet verification code is {otp_code}. It expires in 5 minutes.",
+        "type": "plain",
+        "channel": "generic",
+        "api_key": termii_api_key
+    })
+
+    if response.status_code != 200:
+        print("TERMII ERROR:", response.status_code, response.text)
+        return jsonify({"error": "Failed to send OTP. Please try again."}), 500
+
+    return jsonify({"message": f"OTP sent to {user['phone']}."}), 200
+
+@app.route('/verify-otp', methods=['POST'])
+def verify_otp():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    data = request.json
+    entered_code = data.get('otp_code', '').strip()
+
+    stored_code = session.get('otp_code')
+    expires_at = session.get('otp_expires_at')
+
+    if not stored_code or not expires_at:
+        return jsonify({"error": "No OTP was requested. Please request a new code."}), 400
+
+    if time.time() > expires_at:
+        session.pop('otp_code', None)
+        session.pop('otp_expires_at', None)
+        return jsonify({"error": "OTP has expired. Please request a new code."}), 400
+
+    if entered_code != stored_code:
+        return jsonify({"error": "Incorrect code. Please try again."}), 400
+
+    session.pop('otp_code', None)
+    session.pop('otp_expires_at', None)
+    session['phone_verified'] = True
+
+    return jsonify({"message": "Phone number verified successfully."}), 200
 
 @app.route('/logout')
 def logout():

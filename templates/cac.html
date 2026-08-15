@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAC | BetterWallet</title>
+<style>
+  body{background:#000;color:#fff;font-family:Arial,sans-serif;margin:0;padding:0;}
+  .phone{max-width:430px;margin:0 auto;padding:16px;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:10px 0 20px;}
+  .back{width:40px;height:40px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .topbar h1{font-size:20px;margin:0;}
+  .topbar p{font-size:13px;color:#9aa;margin:2px 0 0;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:20px;}
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:10px 6px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid #2a2a2a;
+    background:#111;
+    color:#cfd3d2;
+  }
+  .tab.active{background:#1ee06a;color:#063d22;border-color:#1ee06a;}
+
+  .panel{
+    background:#111;
+    border:1px solid #2a2a2a;
+    border-radius:14px;
+    padding:24px 20px;
+    text-align:center;
+  }
+  .panel-logo{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    object-fit:cover;
+    margin:0 auto 16px;
+    display:block;
+  }
+  .panel h2{font-size:17px;margin:0 0 8px;}
+  .panel p{font-size:13px;color:#9aa;line-height:1.6;margin:0 0 20px;}
+
+  .btn-primary{display:block;width:100%;background:#1ee06a;color:#063d22;border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+  <div class="phone">
+
+    <div class="topbar">
+      <div class="back" onclick="window.location.href='/dashboard'">←</div>
+      <div>
+        <h1>CAC</h1>
+        <p>Business registration services</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tab-cac" onclick="showTab('cac')">CAC Registration</div>
+      <div class="tab" id="tab-trademark" onclick="showTab('trademark')">Trademark Registration</div>
+      <div class="tab" id="tab-scuml" onclick="showTab('scuml')">SCUML Registration</div>
+    </div>
+
+    <div class="panel">
+      <img class="panel-logo" id="panel-logo" src="/static/images/cac-logo.jpeg" alt="">
+      <h2 id="panel-title">CAC Registration</h2>
+      <p id="panel-text">Register a business name, company, or incorporated trustee with the Corporate Affairs Commission.</p>
+      <button class="btn-primary" id="panel-btn" onclick="getStarted()">Get Started</button>
+    </div>
+
+  </div>
+
+  <script>
+    const tabs = {
+      cac: {
+        title: 'CAC Registration',
+        text: 'Register a business name, company, or incorporated trustee with the Corporate Affairs Commission.',
+        logo: '/static/images/cac-logo.jpeg'
+      },
+      trademark: {
+        title: 'Trademark Registration',
+        text: 'Protect your business name or logo by registering it as a legal trademark.',
+        logo: '/static/images/trademark-logo.jpeg'
+      },
+      scuml: {
+        title: 'SCUML Registration',
+        text: 'Get your SCUML certificate to legally operate a regulated business and open certain bank accounts.',
+        logo: '/static/images/scuml-logo.jpeg'
+      }
+    };
+
+    let currentTab = 'cac';
+
+    function showTab(tabName){
+      currentTab = tabName;
+
+      document.getElementById('tab-cac').classList.remove('active');
+      document.getElementById('tab-trademark').classList.remove('active');
+      document.getElementById('tab-scuml').classList.remove('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      const t = tabs[tabName];
+      document.getElementById('panel-logo').src = t.logo;
+      document.getElementById('panel-title').textContent = t.title;
+      document.getElementById('panel-text').textContent = t.text;
+    }
+
+    function getStarted(){
+      alert('This service is coming soon!');
+    }
+  </script>
+</body>
+</html>

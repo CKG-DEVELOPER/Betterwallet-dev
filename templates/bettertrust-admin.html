@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Pending Verifications - BetterWallet Better-Trust</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 24px 16px 60px;
+        }
+        .container { max-width: 480px; margin: 0 auto; }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #151515;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .heading h1 { font-size: 20px; margin: 0; }
+        .heading p { font-size: 13px; color: #8b9290; margin: 2px 0 0; }
+
+        .verify-card {
+            background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .applicant-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: rgba(0, 255, 136, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #00ff88;
+            flex-shrink: 0;
+        }
+        .applicant-name { font-size: 15px; font-weight: 700; margin: 0; }
+        .applicant-business { font-size: 12px; color: #8b9290; margin: 0; }
+
+        .detail-block {
+            font-size: 13px;
+            color: #cfd3d2;
+            margin-bottom: 14px;
+            line-height: 1.6;
+            background-color: #0a0a0a;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .detail-block span { color: #8b9290; }
+
+        .docs-label {
+            font-size: 12px;
+            color: #8b9290;
+            margin: 0 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .docs-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .doc-link {
+            flex: 1;
+            text-align: center;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px 6px;
+            text-decoration: none;
+            color: #cfd3d2;
+        }
+        .doc-link.missing {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .doc-icon { font-size: 18px; }
+        .doc-label { font-size: 11px; margin: 4px 0 0; }
+
+        .payment-status {
+            font-size: 12px;
+            margin: 0 0 14px;
+        }
+        .payment-status.paid { color: #00ff88; }
+        .payment-status.pending { color: #ffc800; }
+
+        .action-row { display: flex; gap: 8px; }
+        .approve-btn {
+            flex: 1;
+            background-color: #00ff88;
+            color: #000000;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .reject-btn {
+            flex: 1;
+            background-color: transparent;
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .approve-btn:disabled, .reject-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .status-label {
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+        }
+        .status-label.approved { color: #00ff88; }
+        .status-label.rejected { color: #ff4d4d; }
+
+        .empty-state {
+            text-align: center;
+            color: #888888;
+            margin-top: 60px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="top-row">
+        <a href="/dashboard" class="back-btn">←</a>
+        <div class="heading">
+            <h1>Pending Verifications</h1>
+            <p>Admin only · review documents before approving</p>
+        </div>
+    </div>
+
+    {% if verifications|length == 0 %}
+        <div class="empty-state">No verifications waiting for review right now.</div>
+    {% else %}
+        {% for v in verifications %}
+        <div class="verify-card" data-verification-id="{{ v['id'] }}">
+            <div class="applicant-row">
+                <div class="avatar">{{ v['full_name'][:2]|upper }}</div>
+                <div>
+                    <p class="applicant-name">{{ v['full_name'] }}</p>
+                    <p class="applicant-business">{{ v['business_name'] }}</p>
+                </div>
+            </div>
+
+            <div class="detail-block">
+                <span>Phone</span> {{ v['phone'] }}<br>
+                <span>Email</span> {{ v['email'] }}<br>
+                <span>Address</span> {{ v['address'] }}
+            </div>
+
+            <p class="docs-label">Documents</p>
+            <div class="docs-row">
+                {% if v['id_document'] %}
+                <a href="/static/uploads/{{ v['id_document'] }}" target="_blank" class="doc-link">
+                    <div class="doc-icon">📄</div>
+                    <p class="doc-label">ID doc</p>
+                </a>
+                {% else %}
+                <div class="doc-link missing">
+                    <div class="doc-icon">📄</div>
+                    <p class="doc-label">Missing</p>
+                </div>
+                {% endif %}
+
+                {% if v['business_document'] %}
+                <a href="/static/uploads/{{ v['business_document'] }}" target="_blank" class="doc-link">
+                    <div class="doc-icon">🏢</div>
+                    <p class="doc-label">Business</p>
+                </a>
+                {% else %}
+                <div class="doc-link missing">
+                    <div class="doc-icon">🏢</div>
+                    <p class="doc-label">Missing</p>
+                </div>
+                {% endif %}
+
+                {% if v['selfie_document'] %}
+                <a href="/static/uploads/{{ v['selfie_document'] }}" target="_blank" class="doc-link">
+                    <div class="doc-icon">🤳</div>
+                    <p class="doc-label">Selfie</p>
+                </a>
+                {% else %}
+                <div class="doc-link missing">
+                    <div class="doc-icon">🤳</div>
+                    <p class="doc-label">Missing</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if v['payment_status'] == 'paid' %}
+                <p class="payment-status paid">✓ Payment confirmed ₦2,500</p>
+            {% else %}
+                <p class="payment-status pending">⚠ Payment not yet confirmed</p>
+            {% endif %}
+
+            <div class="action-row">
+                <button class="approve-btn" onclick="updateVerification(this, {{ v['id'] }}, 'approved')">Approve</button>
+                <button class="reject-btn" onclick="updateVerification(this, {{ v['id'] }}, 'rejected')">Reject</button>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+<script>
+    function updateVerification(button, verificationId, newStatus) {
+        const card = button.closest('.verify-card');
+        const buttons = card.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+
+        fetch(`/bettertrust/admin/update/${verificationId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(result => {
+            if (result.status === 200) {
+                const actionRow = card.querySelector('.action-row');
+                const label = newStatus === 'approved' ? '✓ Approved' : '✕ Rejected';
+                const cssClass = newStatus === 'approved' ? 'approved' : 'rejected';
+                actionRow.outerHTML = `<div class="status-label ${cssClass}">${label}</div>`;
+            } else {
+                alert(result.body.error);
+                buttons.forEach(b => b.disabled = false);
+            }
+        })
+        .catch(() => {
+            alert('Something went wrong. Please try again.');
+            buttons.forEach(b => b.disabled = false);
+        });
+    }
+</script>
+
+</body>
+</html>
