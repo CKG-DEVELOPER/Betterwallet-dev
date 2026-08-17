@@ -57,6 +57,53 @@ def init_db():
     conn.commit()
     conn.close()
 
+def init_cac_tables():
+    conn = get_db_connection()
+
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS cac_registrations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            registration_type TEXT NOT NULL,
+
+            full_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            email TEXT NOT NULL,
+
+            business_name_1 TEXT,
+            business_name_2 TEXT,
+            nature_of_business TEXT,
+            business_address TEXT,
+
+            trademark_class TEXT,
+            trademark_type TEXT,
+            goods_services_description TEXT,
+
+            bvn TEXT,
+            bank_name TEXT,
+            bank_account_number TEXT,
+            tin_number TEXT,
+
+            id_document TEXT,
+            passport_photo TEXT,
+            mark_logo_document TEXT,
+            cac_certificate_document TEXT,
+
+            payment_status TEXT DEFAULT 'pending',
+            application_status TEXT DEFAULT 'pending',
+            admin_notes TEXT,
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    if not _column_exists(conn, 'cac_registrations', 'cac_status_report'):
+        conn.execute('ALTER TABLE cac_registrations ADD COLUMN cac_status_report TEXT')
+
+    conn.commit()
+    conn.close()
+
 def init_staffhook_tables():
     conn = get_db_connection()
 
@@ -120,4 +167,5 @@ if __name__ == '__main__':
     init_db()
     init_staffhook_tables()
     init_bettertrust_tables()
+    init_cac_tables()
     print("Database initialized successfully.")

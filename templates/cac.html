@@ -46,30 +46,103 @@
   .panel p{font-size:13px;color:#9aa;line-height:1.6;margin:0 0 20px;}
 
   .btn-primary{display:block;width:100%;background:#1ee06a;color:#063d22;border:none;border-radius:999px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;}
+
+  .form-card{
+    background:#111;
+    border:1px solid #2a2a2a;
+    border-radius:14px;
+    padding:20px;
+  }
+  .form-card h2{font-size:17px;margin:0 0 16px;}
+  label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px;}
+  label .req{color:#ff5c5c;}
+  input, textarea{
+    width:100%;
+    box-sizing:border-box;
+    background:#1b1b1b;
+    border:1px solid #2a2a2a;
+    border-radius:8px;
+    padding:12px;
+    color:#fff;
+    font-size:14px;
+  }
+  textarea{resize:vertical;min-height:70px;}
+  .error-text{color:#ff5c5c;font-size:13px;margin-top:12px;display:none;}
+  .hidden{display:none;}
 </style>
 </head>
 <body>
   <div class="phone">
 
     <div class="topbar">
-      <div class="back" onclick="window.location.href='/dashboard'">←</div>
+      <div class="back" onclick="goBack()">←</div>
       <div>
         <h1>CAC</h1>
         <p>Business registration services</p>
       </div>
     </div>
 
-    <div class="tabs">
+    <div class="tabs" id="tabsRow">
       <div class="tab active" id="tab-cac" onclick="showTab('cac')">CAC Registration</div>
       <div class="tab" id="tab-trademark" onclick="showTab('trademark')">Trademark Registration</div>
       <div class="tab" id="tab-scuml" onclick="showTab('scuml')">SCUML Registration</div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="panelView">
       <img class="panel-logo" id="panel-logo" src="/static/images/cac-logo.jpeg" alt="">
       <h2 id="panel-title">CAC Registration</h2>
       <p id="panel-text">Register a business name, company, or incorporated trustee with the Corporate Affairs Commission.</p>
       <button class="btn-primary" id="panel-btn" onclick="getStarted()">Get Started</button>
+      <button class="btn-primary" style="background:transparent; color:#1ee06a; border:1px solid #1ee06a; margin-top:10px;" onclick="window.location.href='/cac/my-registrations'">Check My CAC</button>
+    </div>
+
+    <div class="form-card hidden" id="formView">
+      <h2 id="form-title">Business Details</h2>
+
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="full_name">
+
+      <label>Phone Number <span class="req">*</span></label>
+      <input type="text" id="phone">
+
+      <label>Email <span class="req">*</span></label>
+      <input type="email" id="email">
+
+      <label>Proposed Business Name (1st Choice) <span class="req">*</span></label>
+      <input type="text" id="business_name_1">
+
+      <label>Proposed Business Name (2nd Choice)</label>
+      <input type="text" id="business_name_2">
+
+      <label>Nature of Business <span class="req">*</span></label>
+      <input type="text" id="nature_of_business">
+
+      <label>Business Address <span class="req">*</span></label>
+      <textarea id="business_address"></textarea>
+
+      <p class="error-text" id="formError"></p>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitDetails()">Continue</button>
+    </div>
+
+    <div class="form-card hidden" id="uploadView">
+      <h2>Upload Documents</h2>
+
+      <label>Valid ID Document <span class="req">*</span></label>
+      <input type="file" id="id_document" accept="image/*,.pdf">
+
+      <label>Passport Photograph <span class="req">*</span></label>
+      <input type="file" id="passport_photo" accept="image/*">
+
+      <p class="error-text" id="uploadError"></p>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitDocuments()">Submit Documents</button>
+    </div>
+
+    <div class="form-card hidden" id="paymentView">
+      <h2>Payment</h2>
+      <p style="color:#9aa;font-size:14px;line-height:1.6;">Pay ₦2,500 to complete your CAC registration submission.</p>
+      <button class="btn-primary" style="margin-top:20px;" onclick="payNow()">Pay Now</button>
     </div>
 
   </div>
@@ -110,7 +183,124 @@
     }
 
     function getStarted(){
-      alert('This service is coming soon!');
+      if (currentTab !== 'cac') {
+        alert('This service is coming soon!');
+        return;
+      }
+      document.getElementById('panelView').classList.add('hidden');
+      document.getElementById('tabsRow').classList.add('hidden');
+      document.getElementById('formView').classList.remove('hidden');
+    }
+
+    function goBack(){
+      const formView = document.getElementById('formView');
+      if (!formView.classList.contains('hidden')) {
+        formView.classList.add('hidden');
+        document.getElementById('panelView').classList.remove('hidden');
+        document.getElementById('tabsRow').classList.remove('hidden');
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    function submitDetails(){
+      const full_name = document.getElementById('full_name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const business_name_1 = document.getElementById('business_name_1').value.trim();
+      const business_name_2 = document.getElementById('business_name_2').value.trim();
+      const nature_of_business = document.getElementById('nature_of_business').value.trim();
+      const business_address = document.getElementById('business_address').value.trim();
+      const errorBox = document.getElementById('formError');
+
+      if (!full_name || !phone || !email || !business_name_1 || !nature_of_business || !business_address) {
+        errorBox.textContent = 'Please fill in all required fields.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      fetch('/cac', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          registration_type: 'cac',
+          full_name: full_name,
+          phone: phone,
+          email: email,
+          business_name_1: business_name_1,
+          business_name_2: business_name_2,
+          nature_of_business: nature_of_business,
+          business_address: business_address
+        })
+      })
+
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('formView').classList.add('hidden');
+          document.getElementById('uploadView').classList.remove('hidden');
+        } else {
+          errorBox.textContent = data.message || 'Something went wrong. Please try again.';
+          errorBox.style.display = 'block';
+        }
+      })
+      .catch(err => {
+        errorBox.textContent = 'Network error. Please try again.';
+        errorBox.style.display = 'block';
+      });
+    }
+
+    function submitDocuments(){
+      const idFile = document.getElementById('id_document').files[0];
+      const passportFile = document.getElementById('passport_photo').files[0];
+      const errorBox = document.getElementById('uploadError');
+
+      if (!idFile || !passportFile) {
+        errorBox.textContent = 'Please select both documents.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      const idData = new FormData();
+      idData.append('doc_type', 'id_document');
+      idData.append('file', idFile);
+
+      const passportData = new FormData();
+      passportData.append('doc_type', 'passport_photo');
+      passportData.append('file', passportFile);
+
+      fetch('/cac/upload-document', { method: 'POST', body: idData })
+        .then(res => res.json())
+        .then(idResult => {
+          return fetch('/cac/upload-document', { method: 'POST', body: passportData })
+            .then(res => res.json());
+        })
+
+        .then(passportResult => {
+          document.getElementById('uploadView').classList.add('hidden');
+          document.getElementById('paymentView').classList.remove('hidden');
+        })
+        .catch(err => {
+          errorBox.textContent = 'Upload failed. Please try again.';
+          errorBox.style.display = 'block';
+        });
+    }
+
+    function payNow(){
+      fetch('/cac/initiate-payment', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.payment_link) {
+            window.location.href = data.payment_link;
+          } else {
+            alert(data.error || 'Could not start payment. Please try again.');
+          }
+        })
+        .catch(err => {
+          alert('Network error. Please try again.');
+        });
     }
   </script>
 </body>

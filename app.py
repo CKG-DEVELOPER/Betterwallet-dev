@@ -11,7 +11,7 @@ load_dotenv()
 
 from chatbot import get_chat_reply
 
-from database import get_db_connection, init_db, init_staffhook_tables, init_bettertrust_tables
+from database import get_db_connection, init_db, init_staffhook_tables, init_bettertrust_tables, init_cac_tables
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
@@ -20,13 +20,237 @@ CORS(app, supports_credentials=True)
 init_db()
 init_staffhook_tables()
 init_bettertrust_tables()
+init_cac_tables()
 
-@app.route('/cac')
+@app.route('/cac/my-registrations')
+def cac_my_registrations():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+    registrations = conn.execute('''
+        SELECT * FROM cac_registrations
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+    ''', (session['user_id'],)).fetchall()
+    conn.close()
+
+    return render_template('my-cac-registrations.html', registrations=registrations)
+
+@app.route('/cac/verify-payment')
+def cac_verify_payment():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    status = request.args.get('status')
+    tx_ref = request.args.get('tx_ref')
+    transaction_id = request.args.get('transaction_id')
+
+    registration_id = session.get('pending_cac_id')
+
+    if status not in ('successful', 'completed') or not transaction_id:
+        return render_template('payment-failed.html')
+
+    if session.get('cac_pending_tx_ref') != tx_ref:
+        return render_template('payment-failed.html')
+
+    flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
+
+    response = requests.get(
+        f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify',
+        headers={"Authorization": f"Bearer {flw_secret_key}"}
+    )
+
+    data = response.json()
+
+    if data.get('status') != 'success':
+        return render_template('payment-failed.html')
+
+    tx_data = data['data']
+
+    if tx_data['status'] not in ('successful', 'completed'):
+        return render_template('payment-failed.html')
+
+    if tx_data['amount'] < 2500:
+        return render_template('payment-failed.html')
+
+    if tx_data['currency'] != 'NGN':
+        return render_template('payment-failed.html')
+
+    conn = get_db_connection()
+    conn.execute('UPDATE cac_registrations SET payment_status = ? WHERE id = ?', ('paid', registration_id))
+    conn.commit()
+    conn.close()
+
+    session.pop('cac_pending_tx_ref', None)
+
+    return redirect('/cac?payment=verified')
+
+@app.route('/cac/admin/upload-certificate/<int:registration_id>', methods=['POST'])
+def cac_admin_upload_certificate(registration_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    admin_email = os.getenv('ADMIN_EMAIL', '')
+    is_admin = session.get('user_email', '').lower() == admin_email.lower()
+
+    if not is_admin:
+        return jsonify({"error": "You are not authorized to do this."}), 403
+
+    doc_type = request.form.get('doc_type')
+    if doc_type not in ('cac_certificate_document', 'cac_status_report'):
+        return jsonify({"error": "Invalid document type."}), 400
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded."}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected."}), 400
+
+    filename = f"cac_{registration_id}_{doc_type}_{file.filename}"
+    file.save(os.path.join('static/uploads', filename))
+
+    conn = get_db_connection()
+    conn.execute(f'UPDATE cac_registrations SET {doc_type} = ? WHERE id = ?', (filename, registration_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Document uploaded.", "filename": filename}), 200
+
+@app.route('/cac/admin')
+def cac_admin():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    admin_email = os.getenv('ADMIN_EMAIL', '')
+    is_admin = session.get('user_email', '').lower() == admin_email.lower()
+
+    if not is_admin:
+        return jsonify({"error": "You are not authorized to view this page."}), 403
+
+    conn = get_db_connection()
+    registrations = conn.execute('''
+        SELECT * FROM cac_registrations
+        WHERE payment_status = 'paid'
+        ORDER BY created_at DESC
+    ''').fetchall()
+    conn.close()
+
+    return render_template('cac-admin.html', registrations=registrations)
+
+@app.route('/cac/initiate-payment', methods=['POST'])
+def cac_initiate_payment():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    registration_id = session.get('pending_cac_id')
+    if not registration_id:
+        return jsonify({"error": "No registration in progress. Please start over."}), 400
+
+    flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
+    tx_ref = f"cac-{session['user_id']}-{int(time.time())}"
+
+    session['cac_pending_tx_ref'] = tx_ref
+
+    response = requests.post(
+        'https://api.flutterwave.com/v3/payments',
+        headers={"Authorization": f"Bearer {flw_secret_key}"},
+        json={
+            "tx_ref": tx_ref,
+            "amount": "2500",
+            "currency": "NGN",
+            "redirect_url": "http://127.0.0.1:5000/cac/verify-payment",
+            "customer": {
+                "email": session.get('user_email', 'test@betterwallet.com')
+            },
+            "customizations": {
+                "title": "BetterWallet CAC Registration",
+                "description": "CAC business registration fee"
+            }
+        }
+    )
+
+    data = response.json()
+
+    if data.get('status') != 'success':
+        print("FLUTTERWAVE ERROR:", data)
+        return jsonify({"error": "Could not start payment. Please try again."}), 500
+
+    payment_link = data['data']['link']
+    return jsonify({"payment_link": payment_link}), 200
+
+@app.route('/cac/upload-document', methods=['POST'])
+def cac_upload_document():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    registration_id = session.get('pending_cac_id')
+    if not registration_id:
+        return jsonify({"error": "No registration in progress. Please start over."}), 400
+
+    doc_type = request.form.get('doc_type')
+    if doc_type not in ('id_document', 'passport_photo'):
+        return jsonify({"error": "Invalid document type."}), 400
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded."}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected."}), 400
+
+    filename = f"cac_{registration_id}_{doc_type}_{file.filename}"
+    file.save(os.path.join('static/uploads', filename))
+
+    conn = get_db_connection()
+    conn.execute(f'UPDATE cac_registrations SET {doc_type} = ? WHERE id = ?', (filename, registration_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Document uploaded.", "filename": filename}), 200
+
+
+@app.route('/cac', methods=['GET', 'POST'])
 def cac_hub():
     if 'user_id' not in session:
         return redirect('/login')
 
-    return render_template('cac.html')
+    if request.method == 'GET':
+        return render_template('cac.html')
+
+    data = request.json
+    registration_type = data.get('registration_type', '').strip()
+    full_name = data.get('full_name', '').strip()
+    phone = data.get('phone', '').strip()
+    email = data.get('email', '').strip()
+    business_name_1 = data.get('business_name_1', '').strip()
+    business_name_2 = data.get('business_name_2', '').strip()
+    nature_of_business = data.get('nature_of_business', '').strip()
+    business_address = data.get('business_address', '').strip()
+
+    if not full_name or not phone or not email or not business_name_1 or not nature_of_business or not business_address:
+        return jsonify({"success": False, "message": "All required fields must be filled."}), 400
+
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO cac_registrations (
+            user_id, registration_type, full_name, phone, email,
+            business_name_1, business_name_2, nature_of_business, business_address
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        session['user_id'], registration_type, full_name, phone, email,
+        business_name_1, business_name_2, nature_of_business, business_address
+    ))
+    conn.commit()
+
+    new_id = conn.execute('SELECT last_insert_rowid() AS id').fetchone()['id']
+    conn.close()
+
+    session['pending_cac_id'] = new_id
+
+    return jsonify({"success": True, "registration_id": new_id}), 201
 
 @app.route('/bettertrust/admin')
 def bettertrust_admin():
