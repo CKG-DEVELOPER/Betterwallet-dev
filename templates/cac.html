@@ -85,7 +85,9 @@
     <div class="tabs" id="tabsRow">
       <div class="tab active" id="tab-cac" onclick="showTab('cac')">CAC Registration</div>
       <div class="tab" id="tab-trademark" onclick="showTab('trademark')">Trademark Registration</div>
-      <div class="tab" id="tab-scuml" onclick="showTab('scuml')">SCUML Registration</div>
+            <div class="tab" id="tab-scuml" onclick="showTab('scuml')" style="position:relative;">SCUML Registration
+        <span style="position:absolute; top:-8px; right:-4px; background:#854f0b; color:#faeeda; font-size:8px; font-weight:700; padding:2px 5px; border-radius:6px;">FREE*</span>
+      </div>
     </div>
 
     <div class="panel" id="panelView">
@@ -145,6 +147,113 @@
       <button class="btn-primary" style="margin-top:20px;" onclick="payNow()">Pay Now</button>
     </div>
 
+    <div class="form-card hidden" id="trademarkFormView">
+      <h2>Trademark Details</h2>
+
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="tm_full_name">
+
+      <label>Phone Number <span class="req">*</span></label>
+      <input type="text" id="tm_phone">
+
+      <label>Email <span class="req">*</span></label>
+      <input type="email" id="tm_email">
+
+      <label>Business/Brand Name to Trademark <span class="req">*</span></label>
+      <input type="text" id="tm_business_name_1">
+
+      <label>Trademark Class <span class="req">*</span></label>
+      <input type="text" id="tm_trademark_class" placeholder="e.g. Class 25 - Clothing">
+
+      <label>Type of Mark <span class="req">*</span></label>
+      <input type="text" id="tm_trademark_type" placeholder="e.g. Word mark, Logo mark">
+
+      <label>Description of Goods/Services <span class="req">*</span></label>
+      <textarea id="tm_goods_services_description"></textarea>
+
+      <p class="error-text" id="trademarkFormError"></p>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitTrademarkDetails()">Continue</button>
+    </div>
+
+    <div class="form-card hidden" id="trademarkUploadView">
+      <h2>Upload Documents</h2>
+
+      <label>Valid ID Document <span class="req">*</span></label>
+      <input type="file" id="tm_id_document" accept="image/*,.pdf">
+
+      <label>Passport Photograph <span class="req">*</span></label>
+      <input type="file" id="tm_passport_photo" accept="image/*">
+
+      <label>Logo/Mark Image <span class="req">*</span></label>
+      <input type="file" id="tm_mark_logo_document" accept="image/*">
+
+      <p class="error-text" id="trademarkUploadError"></p>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitTrademarkDocuments()">Submit Documents</button>
+    </div>
+
+        <div class="form-card hidden" id="trademarkPaymentView">
+      <h2>Payment</h2>
+      <p style="color:#9aa;font-size:14px;line-height:1.6;">Pay ₦2,500 to complete your Trademark registration submission.</p>
+      <button class="btn-primary" style="margin-top:20px;" onclick="trademarkPayNow()">Pay Now</button>
+    </div>
+
+    <div class="form-card hidden" id="scumlFormView">
+      <h2>SCUML Details</h2>
+
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="sc_full_name">
+
+      <label>Phone Number <span class="req">*</span></label>
+      <input type="text" id="sc_phone">
+
+      <label>Email <span class="req">*</span></label>
+      <input type="email" id="sc_email">
+
+      <label>Business Name <span class="req">*</span></label>
+      <input type="text" id="sc_business_name_1">
+
+      <label>BVN (Bank Verification Number) <span class="req">*</span></label>
+      <input type="text" id="sc_bvn">
+
+      <label>Bank Name <span class="req">*</span></label>
+      <input type="text" id="sc_bank_name">
+
+      <label>Bank Account Number <span class="req">*</span></label>
+      <input type="text" id="sc_bank_account_number">
+
+      <label>Tax Identification Number (TIN) <span class="req">*</span></label>
+      <input type="text" id="sc_tin_number">
+
+            <p class="error-text" id="scumlFormError"></p>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitScumlDetails()">Continue</button>
+    </div>
+
+    <div class="form-card hidden" id="scumlUploadView">
+      <h2>Upload Documents</h2>
+
+      <label>Valid ID Document <span class="req">*</span></label>
+      <input type="file" id="sc_id_document" accept="image/*,.pdf">
+
+      <label>Passport Photograph <span class="req">*</span></label>
+      <input type="file" id="sc_passport_photo" accept="image/*">
+
+      <p class="error-text" id="scumlUploadError"></p>
+
+      <button class="btn-primary" style="margin-top:20px;" onclick="submitScumlDocuments()">Submit Documents</button>
+    </div>
+
+    <div class="form-card hidden" id="scumlPaymentView">
+      <h2>Payment</h2>
+      <p style="color:#9aa;font-size:14px;line-height:1.6;">Pay ₦2,500 to complete your SCUML registration submission.</p>
+      <div style="background:#1b1b1b; border:1px solid #854f0b; border-radius:8px; padding:10px; margin-bottom:14px;">
+        <p style="color:#faeeda; font-size:12px; margin:0; line-height:1.6;">Reminder: SCUML certification is free from government. This fee is for our service handling your application end to end.</p>
+      </div>
+      <button class="btn-primary" style="margin-top:0px;" onclick="scumlPayNow()">Pay Now</button>
+    </div>
+
   </div>
 
   <script>
@@ -159,9 +268,10 @@
         text: 'Protect your business name or logo by registering it as a legal trademark.',
         logo: '/static/images/trademark-logo.jpeg'
       },
-      scuml: {
+
+            scuml: {
         title: 'SCUML Registration',
-        text: 'Get your SCUML certificate to legally operate a regulated business and open certain bank accounts.',
+        text: 'Get your SCUML certificate to legally operate a regulated business and open certain bank accounts. Note: SCUML registration itself is free with the government — this fee covers us handling the registration process for you.',
         logo: '/static/images/scuml-logo.jpeg'
       }
     };
@@ -182,20 +292,32 @@
       document.getElementById('panel-text').textContent = t.text;
     }
 
-    function getStarted(){
-      if (currentTab !== 'cac') {
-        alert('This service is coming soon!');
-        return;
-      }
+        function getStarted(){
       document.getElementById('panelView').classList.add('hidden');
       document.getElementById('tabsRow').classList.add('hidden');
-      document.getElementById('formView').classList.remove('hidden');
+
+      if (currentTab === 'cac') {
+        document.getElementById('formView').classList.remove('hidden');
+      } else if (currentTab === 'trademark') {
+        document.getElementById('trademarkFormView').classList.remove('hidden');
+      } else if (currentTab === 'scuml') {
+        document.getElementById('scumlFormView').classList.remove('hidden');
+      } else {
+        alert('This service is coming soon!');
+        document.getElementById('panelView').classList.remove('hidden');
+        document.getElementById('tabsRow').classList.remove('hidden');
+      }
     }
 
     function goBack(){
       const formView = document.getElementById('formView');
-      if (!formView.classList.contains('hidden')) {
+      const trademarkFormView = document.getElementById('trademarkFormView');
+      const scumlFormView = document.getElementById('scumlFormView');
+
+      if (!formView.classList.contains('hidden') || !trademarkFormView.classList.contains('hidden') || !scumlFormView.classList.contains('hidden')) {
         formView.classList.add('hidden');
+        trademarkFormView.classList.add('hidden');
+        scumlFormView.classList.add('hidden');
         document.getElementById('panelView').classList.remove('hidden');
         document.getElementById('tabsRow').classList.remove('hidden');
       } else {
@@ -290,6 +412,213 @@
 
     function payNow(){
       fetch('/cac/initiate-payment', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.payment_link) {
+            window.location.href = data.payment_link;
+          } else {
+            alert(data.error || 'Could not start payment. Please try again.');
+          }
+        })
+        .catch(err => {
+          alert('Network error. Please try again.');
+        });
+    }
+
+    function submitTrademarkDetails(){
+      const full_name = document.getElementById('tm_full_name').value.trim();
+      const phone = document.getElementById('tm_phone').value.trim();
+      const email = document.getElementById('tm_email').value.trim();
+      const business_name_1 = document.getElementById('tm_business_name_1').value.trim();
+      const trademark_class = document.getElementById('tm_trademark_class').value.trim();
+      const trademark_type = document.getElementById('tm_trademark_type').value.trim();
+      const goods_services_description = document.getElementById('tm_goods_services_description').value.trim();
+      const errorBox = document.getElementById('trademarkFormError');
+
+      if (!full_name || !phone || !email || !business_name_1 || !trademark_class || !trademark_type || !goods_services_description) {
+        errorBox.textContent = 'Please fill in all required fields.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      fetch('/trademark', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          registration_type: 'trademark',
+          full_name: full_name,
+          phone: phone,
+          email: email,
+          business_name_1: business_name_1,
+          trademark_class: trademark_class,
+          trademark_type: trademark_type,
+          goods_services_description: goods_services_description
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('trademarkFormView').classList.add('hidden');
+          document.getElementById('trademarkUploadView').classList.remove('hidden');
+        } else {
+          errorBox.textContent = data.message || 'Something went wrong. Please try again.';
+          errorBox.style.display = 'block';
+        }
+      })
+      .catch(err => {
+        errorBox.textContent = 'Network error. Please try again.';
+        errorBox.style.display = 'block';
+      });
+    }
+
+    function submitTrademarkDocuments(){
+      const idFile = document.getElementById('tm_id_document').files[0];
+      const passportFile = document.getElementById('tm_passport_photo').files[0];
+      const markFile = document.getElementById('tm_mark_logo_document').files[0];
+      const errorBox = document.getElementById('trademarkUploadError');
+
+      if (!idFile || !passportFile || !markFile) {
+        errorBox.textContent = 'Please select all three files.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      const idData = new FormData();
+      idData.append('doc_type', 'id_document');
+      idData.append('file', idFile);
+
+      const passportData = new FormData();
+      passportData.append('doc_type', 'passport_photo');
+      passportData.append('file', passportFile);
+
+      const markData = new FormData();
+      markData.append('doc_type', 'mark_logo_document');
+      markData.append('file', markFile);
+
+      fetch('/trademark/upload-document', { method: 'POST', body: idData })
+        .then(res => res.json())
+        .then(idResult => {
+          return fetch('/trademark/upload-document', { method: 'POST', body: passportData })
+            .then(res => res.json());
+        })
+        .then(passportResult => {
+          return fetch('/trademark/upload-document', { method: 'POST', body: markData })
+            .then(res => res.json());
+        })
+        .then(markResult => {
+          document.getElementById('trademarkUploadView').classList.add('hidden');
+          document.getElementById('trademarkPaymentView').classList.remove('hidden');
+        })
+        .catch(err => {
+          errorBox.textContent = 'Upload failed. Please try again.';
+          errorBox.style.display = 'block';
+        });
+    }
+
+        function trademarkPayNow(){
+      fetch('/trademark/initiate-payment', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.payment_link) {
+            window.location.href = data.payment_link;
+          } else {
+            alert(data.error || 'Could not start payment. Please try again.');
+          }
+        })
+        .catch(err => {
+          alert('Network error. Please try again.');
+        });
+    }
+
+    function submitScumlDetails(){
+      const full_name = document.getElementById('sc_full_name').value.trim();
+      const phone = document.getElementById('sc_phone').value.trim();
+      const email = document.getElementById('sc_email').value.trim();
+      const business_name_1 = document.getElementById('sc_business_name_1').value.trim();
+      const bvn = document.getElementById('sc_bvn').value.trim();
+      const bank_name = document.getElementById('sc_bank_name').value.trim();
+      const bank_account_number = document.getElementById('sc_bank_account_number').value.trim();
+      const tin_number = document.getElementById('sc_tin_number').value.trim();
+      const errorBox = document.getElementById('scumlFormError');
+
+      if (!full_name || !phone || !email || !business_name_1 || !bvn || !bank_name || !bank_account_number || !tin_number) {
+        errorBox.textContent = 'Please fill in all required fields.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      fetch('/scuml', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          registration_type: 'scuml',
+          full_name: full_name,
+          phone: phone,
+          email: email,
+          business_name_1: business_name_1,
+          bvn: bvn,
+          bank_name: bank_name,
+          bank_account_number: bank_account_number,
+          tin_number: tin_number
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('scumlFormView').classList.add('hidden');
+          document.getElementById('scumlUploadView').classList.remove('hidden');
+        } else {
+          errorBox.textContent = data.message || 'Something went wrong. Please try again.';
+          errorBox.style.display = 'block';
+        }
+      })
+      .catch(err => {
+        errorBox.textContent = 'Network error. Please try again.';
+        errorBox.style.display = 'block';
+      });
+    }
+
+    function submitScumlDocuments(){
+      const idFile = document.getElementById('sc_id_document').files[0];
+      const passportFile = document.getElementById('sc_passport_photo').files[0];
+      const errorBox = document.getElementById('scumlUploadError');
+
+      if (!idFile || !passportFile) {
+        errorBox.textContent = 'Please select both documents.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      errorBox.style.display = 'none';
+
+      const idData = new FormData();
+      idData.append('doc_type', 'id_document');
+      idData.append('file', idFile);
+
+      const passportData = new FormData();
+      passportData.append('doc_type', 'passport_photo');
+      passportData.append('file', passportFile);
+
+      fetch('/scuml/upload-document', { method: 'POST', body: idData })
+        .then(res => res.json())
+        .then(idResult => {
+          return fetch('/scuml/upload-document', { method: 'POST', body: passportData })
+            .then(res => res.json());
+        })
+        .then(passportResult => {
+          document.getElementById('scumlUploadView').classList.add('hidden');
+          document.getElementById('scumlPaymentView').classList.remove('hidden');
+        })
+        .catch(err => {
+          errorBox.textContent = 'Upload failed. Please try again.';
+          errorBox.style.display = 'block';
+        });
+    }
+
+    function scumlPayNow(){
+      fetch('/scuml/initiate-payment', { method: 'POST' })
         .then(res => res.json())
         .then(data => {
           if (data.payment_link) {

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - SCUML</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 24px 16px 60px;
+        }
+        .container { max-width: 480px; margin: 0 auto; }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: #151515;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .heading h1 { font-size: 20px; margin: 0; }
+        .heading p { font-size: 13px; color: #8b9290; margin: 2px 0 0; }
+
+        .job-card {
+            background-color: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .job-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+        .job-sub { font-size: 13px; color: #8b9290; margin: 0 0 10px; }
+        .employer-info { font-size: 13px; color: #cfd3d2; margin-bottom: 6px; }
+        .employer-info span { color: #8b9290; }
+
+        .doc-links {
+            display: flex;
+            gap: 10px;
+            margin: 12px 0 14px;
+        }
+        .doc-links a {
+            flex: 1;
+            text-align: center;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            color: #1ee06a;
+            text-decoration: none;
+        }
+
+        .copy-btn {
+            display: block;
+            width: 100%;
+            background-color: #1b1b1b;
+            border: 1px solid #2a2a2a;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+        .copy-btn:active {
+            background-color: #2a2a2a;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+        .approve-btn, .reject-btn {
+            flex: 1;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .approve-btn {
+            background-color: #00ff88;
+            color: #000000;
+        }
+        .reject-btn {
+            background-color: #1b1b1b;
+            color: #ff5c5c;
+            border: 1px solid #ff5c5c;
+        }
+        .approve-btn:disabled, .reject-btn:disabled {
+            background-color: #444444;
+            color: #999999;
+            border-color: #444444;
+            cursor: not-allowed;
+        }
+        .status-label {
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+        }
+        .status-label.approved { color: #00ff88; }
+        .status-label.rejected { color: #ff5c5c; }
+
+        .empty-state {
+            text-align: center;
+            color: #888888;
+            margin-top: 60px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="top-row">
+        <a href="/dashboard" class="back-btn">←</a>
+        <div class="heading">
+            <h1>SCUML Review</h1>
+            <p>Admin only · paid registrations awaiting review</p>
+        </div>
+    </div>
+
+    {% if registrations|length == 0 %}
+        <div class="empty-state">No paid SCUML registrations waiting for review right now.</div>
+    {% else %}
+        {% for reg in registrations %}
+        <div class="job-card">
+            <div class="job-title">{{ reg.business_name_1 }}</div>
+            <div class="job-sub">Bank: {{ reg.bank_name }}</div>
+
+            <div class="employer-info"><span>Applicant:</span> {{ reg.full_name }}</div>
+            <div class="employer-info"><span>Phone:</span> {{ reg.phone }}</div>
+            <div class="employer-info"><span>Email:</span> {{ reg.email }}</div>
+            <div class="employer-info"><span>BVN:</span> {{ reg.bvn }}</div>
+            <div class="employer-info"><span>Bank Account:</span> {{ reg.bank_account_number }}</div>
+            <div class="employer-info"><span>TIN:</span> {{ reg.tin_number }}</div>
+
+            <div class="doc-links">
+                <a href="/static/uploads/{{ reg.id_document }}" target="_blank">View ID</a>
+                <a href="/static/uploads/{{ reg.passport_photo }}" target="_blank">View Passport Photo</a>
+            </div>
+
+            <button class="copy-btn" onclick="copyDetails(this, '{{ reg.full_name }}', '{{ reg.phone }}', '{{ reg.email }}', '{{ reg.business_name_1 }}', '{{ reg.bvn }}', '{{ reg.bank_name }}', '{{ reg.bank_account_number }}', '{{ reg.tin_number }}')">Copy Details</button>
+
+            {% if reg.application_status == 'approved' %}
+                <div class="status-label approved">✓ Approved</div>
+            {% elif reg.application_status == 'rejected' %}
+                <div class="status-label rejected">✗ Rejected</div>
+            {% else %}
+                <div class="btn-row">
+                    <button class="approve-btn" onclick="updateStatus(this, {{ reg.id }}, 'approved')">Approve</button>
+                    <button class="reject-btn" onclick="updateStatus(this, {{ reg.id }}, 'rejected')">Reject</button>
+                </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+<script>
+    function copyDetails(button, fullName, phone, email, businessName1, bvn, bankName, bankAccountNumber, tinNumber) {
+        let text = "Full Name: " + fullName + "\n";
+        text += "Phone: " + phone + "\n";
+        text += "Email: " + email + "\n";
+        text += "Business Name: " + businessName1 + "\n";
+        text += "BVN: " + bvn + "\n";
+        text += "Bank Name: " + bankName + "\n";
+        text += "Bank Account Number: " + bankAccountNumber + "\n";
+        text += "TIN: " + tinNumber;
+
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 1500);
+        }).catch(() => {
+            alert('Could not copy. Please try again.');
+        });
+    }
+
+    function updateStatus(button, registrationId, newStatus) {
+        const card = button.closest('.job-card');
+        const buttons = card.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+        button.textContent = newStatus === 'approved' ? 'Approving...' : 'Rejecting...';
+
+        fetch(`/scuml/admin/update/${registrationId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(result => {
+            if (result.status === 200) {
+                window.location.reload();
+            } else {
+                alert(result.body.error || 'Something went wrong.');
+                buttons.forEach(b => b.disabled = false);
+                button.textContent = newStatus === 'approved' ? 'Approve' : 'Reject';
+            }
+        })
+        .catch(() => {
+            alert('Something went wrong. Please try again.');
+            buttons.forEach(b => b.disabled = false);
+            button.textContent = newStatus === 'approved' ? 'Approve' : 'Reject';
+        });
+    }
+</script>
+
+</body>
+</html>

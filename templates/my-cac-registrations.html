@@ -76,11 +76,16 @@
         <p>You haven't started a CAC registration. Get started to register your business.</p>
         <a class="btn-primary" href="/cac">Get Started</a>
       </div>
-    {% else %}
+          {% else %}
       {% for reg in registrations %}
       <div class="card">
         <h2>{{ reg.business_name_1 }}</h2>
-        <p class="sub">{{ reg.nature_of_business }}</p>
+
+        {% if reg.registration_type == 'trademark' %}
+          <p class="sub">{{ reg.trademark_class }} · {{ reg.trademark_type }}</p>
+        {% else %}
+          <p class="sub">{{ reg.nature_of_business }}</p>
+        {% endif %}
 
         {% if reg.application_status == 'approved' %}
           <div class="status approved">Approved</div>
@@ -92,12 +97,14 @@
           <div class="status pending">Pending review</div>
         {% endif %}
 
-        {% if reg.cac_certificate_document %}
-          <a class="doc-link" href="/static/uploads/{{ reg.cac_certificate_document }}" target="_blank">Download Certificate of Incorporation</a>
-        {% endif %}
+        {% if reg.registration_type == 'cac' %}
+          {% if reg.cac_certificate_document %}
+            <a class="doc-link" href="/static/uploads/{{ reg.cac_certificate_document }}" target="_blank">Download Certificate of Incorporation</a>
+          {% endif %}
 
-        {% if reg.cac_status_report %}
-          <a class="doc-link" href="/static/uploads/{{ reg.cac_status_report }}" target="_blank">Download Status Report</a>
+          {% if reg.cac_status_report %}
+            <a class="doc-link" href="/static/uploads/{{ reg.cac_status_report }}" target="_blank">Download Status Report</a>
+          {% endif %}
         {% endif %}
       </div>
       {% endfor %}

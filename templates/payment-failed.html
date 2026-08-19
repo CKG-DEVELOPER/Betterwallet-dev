@@ -49,7 +49,7 @@
         <div class="icon">⚠️</div>
         <h1>Payment Not Confirmed</h1>
         <p>We couldn't verify your payment. No charges were completed, or the transaction didn't go through. Please try again.</p>
-        <a href="/staffhook/post-job" class="btn-primary">Try Again</a>
+                <a href="{{ retry_url|default('/dashboard') }}" class="btn-primary">Try Again</a>
     </div>
 </body>
 </html>
