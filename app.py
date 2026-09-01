@@ -91,7 +91,7 @@ def scuml_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": "http://127.0.0.1:5000/scuml/verify-payment",
+                        "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/scuml/verify-payment",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -301,7 +301,7 @@ def trademark_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": "http://127.0.0.1:5000/trademark/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/trademark/verify-payment",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -564,7 +564,6 @@ def cac_admin():
 def cac_initiate_payment():
     if 'user_id' not in session:
         return jsonify({"error": "You must be logged in."}), 401
-
     registration_id = session.get('pending_cac_id')
     if not registration_id:
         return jsonify({"error": "No registration in progress. Please start over."}), 400
@@ -581,7 +580,7 @@ def cac_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": "http://127.0.0.1:5000/cac/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/cac/verify-payment",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -791,7 +790,7 @@ def bettertrust_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": "http://127.0.0.1:5000/bettertrust/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/bettertrust/verify-payment",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -978,7 +977,7 @@ def initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": "http://127.0.0.1:5000/staffhook/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/staffhook/verify-payment",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
