@@ -38,6 +38,26 @@ def init_bettertrust_tables():
     conn.commit()
     conn.close()
 
+def init_transactions_table():
+    conn = get_db_connection()
+
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            service_type TEXT NOT NULL,
+            description TEXT NOT NULL,
+            amount REAL NOT NULL,
+            tx_ref TEXT,
+            status TEXT DEFAULT 'successful',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
 def init_db():
     conn = get_db_connection()
     conn.execute('''
@@ -168,4 +188,5 @@ if __name__ == '__main__':
     init_staffhook_tables()
     init_bettertrust_tables()
     init_cac_tables()
+    init_transactions_table()
     print("Database initialized successfully.")

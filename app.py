@@ -11,7 +11,7 @@ load_dotenv()
 
 from chatbot import get_chat_reply
 
-from database import get_db_connection, init_db, init_staffhook_tables, init_bettertrust_tables, init_cac_tables
+from database import get_db_connection, init_db, init_staffhook_tables, init_bettertrust_tables, init_cac_tables, init_transactions_table
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
@@ -21,6 +21,7 @@ init_db()
 init_staffhook_tables()
 init_bettertrust_tables()
 init_cac_tables()
+init_transactions_table()
 
 @app.route('/scuml/admin')
 def scuml_admin():
@@ -91,7 +92,7 @@ def scuml_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-                        "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/scuml/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/scuml/verify-payment",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -153,6 +154,10 @@ def scuml_verify_payment():
 
     conn = get_db_connection()
     conn.execute('UPDATE cac_registrations SET payment_status = ? WHERE id = ?', ('paid', registration_id))
+    conn.execute('''
+        INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (session['user_id'], 'scuml', 'SCUML Registration', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
@@ -201,6 +206,21 @@ def scuml_hub():
     session['pending_scuml_id'] = new_id
 
     return jsonify({"success": True, "registration_id": new_id}), 201
+
+@app.route('/my-transactions')
+def my_transactions():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+    transactions = conn.execute('''
+        SELECT * FROM transactions
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+    ''', (session['user_id'],)).fetchall()
+    conn.close()
+
+    return render_template('my-transactions.html', transactions=transactions)
 
 @app.route('/scuml/upload-document', methods=['POST'])
 def scuml_upload_document():
@@ -449,6 +469,10 @@ def cac_verify_payment():
 
     conn = get_db_connection()
     conn.execute('UPDATE cac_registrations SET payment_status = ? WHERE id = ?', ('paid', registration_id))
+    conn.execute('''
+        INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (session['user_id'], 'cac', 'CAC Registration', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
@@ -500,6 +524,10 @@ def trademark_verify_payment():
 
     conn = get_db_connection()
     conn.execute('UPDATE cac_registrations SET payment_status = ? WHERE id = ?', ('paid', registration_id))
+    conn.execute('''
+        INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (session['user_id'], 'trademark', 'Trademark Registration', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
@@ -762,6 +790,10 @@ def bettertrust_verify_payment():
 
     conn = get_db_connection()
     conn.execute('UPDATE verification_requests SET payment_status = ? WHERE id = ?', ('paid', verification_id))
+    conn.execute('''
+        INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (session['user_id'], 'bettertrust', 'Better-Trust Verification', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
@@ -898,11 +930,18 @@ def dashboard():
 
     user = conn.execute('SELECT profile_photo FROM users WHERE id = ?', (session['user_id'],)).fetchone()
 
+    recent_transactions = conn.execute('''
+        SELECT * FROM transactions
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT 4
+    ''', (session['user_id'],)).fetchall()
+
     conn.close()
 
     staffhook_notifications = new_applications + accepted_applications
 
-    return render_template('dashboard.html', staffhook_notifications=staffhook_notifications, user_photo=user['profile_photo'] if user else None)
+    return render_template('dashboard.html', staffhook_notifications=staffhook_notifications, user_photo=user['profile_photo'] if user else None, recent_transactions=recent_transactions)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -1034,6 +1073,14 @@ def verify_payment():
 
     if tx_data['currency'] != 'NGN':
         return render_template('payment-failed.html', retry_url='/staffhook/post-job')
+
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (session['user_id'], 'staffhook', 'StaffHook Job Posting', tx_data['amount'], tx_ref, 'successful'))
+    conn.commit()
+    conn.close()
 
     session['payment_verified'] = True
     session.pop('pending_tx_ref', None)

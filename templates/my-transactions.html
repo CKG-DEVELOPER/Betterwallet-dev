@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetterWallet — Transactions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #F3F7F5;
+    --surface:       #FFFFFF;
+    --surface-raised:#FFFFFF;
+    --text:          #0B0F0D;
+    --text-muted:    #5B625F;
+    --text-faint:    #8B9290;
+    --border:        #E1E6E3;
+    --accent:        #0A8F44;
+    --accent-deep:   #087A3A;
+    --accent-soft:   #E1F5E9;
+    --success:       #0A8F44;
+    --success-bg:    #E1F5E9;
+    --danger:        #E8202C;
+    --danger-bg:     #FCE6E7;
+    --shadow:        0 1px 2px rgba(11,15,13,0.05), 0 8px 24px rgba(11,15,13,0.06);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+    --font-display: "Inter", -apple-system, sans-serif;
+    --font-body: "Inter", -apple-system, sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
+  }
+  html[data-theme="dark"]{
+    --bg:            #000000;
+    --surface:       #0A0A0A;
+    --surface-raised:#111111;
+    --text:          #FFFFFF;
+    --text-muted:    #8B9290;
+    --text-faint:    #5B625F;
+    --border:        rgba(0,255,68,.25);
+    --accent:        #00FF44;
+    --accent-deep:   #0A8F44;
+    --accent-soft:   rgba(0,255,68,.12);
+    --success:       #00FF44;
+    --success-bg:    rgba(0,255,68,.12);
+    --danger:        #E8202C;
+    --danger-bg:     rgba(232,32,44,.15);
+    --shadow:        0 0 18px rgba(0,255,68,.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  .shell{ display:grid; grid-template-columns:236px 1fr; min-height:100vh; }
+
+  .sidebar{
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:28px 18px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; padding:0 8px 26px; margin-bottom:14px; border-bottom:1px solid var(--border); }
+  .brand-mark{width:30px;height:30px;flex-shrink:0;}
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:-0.01em; }
+  .nav-label{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); padding:16px 10px 6px; }
+  .nav-item{
+    display:flex; align-items:center; gap:11px;
+    padding:10px 10px; border-radius:var(--radius-sm);
+    font-size:14px; font-weight:500; color:var(--text-muted);
+  }
+  .nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.85;}
+  .nav-item:hover{background:var(--bg);color:var(--text);}
+  .nav-item.active{ background:var(--accent); color:#fff; }
+  html[data-theme="dark"] .nav-item.active{ color:#000000; background:var(--accent-deep); }
+  .nav-item.disabled{opacity:.45;cursor:default;}
+  .soon-tag{
+    margin-left:auto; font-size:9.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+    background:var(--accent-soft); color:var(--accent); padding:2px 6px; border-radius:20px;
+  }
+
+  .main{padding:30px 40px 60px;max-width:1180px;}
+  .page-head{margin-bottom:26px;}
+  .page-title{font-family:var(--font-display);font-size:24px;font-weight:800;}
+  .page-sub{font-size:13.5px;color:var(--text-muted);margin-top:6px;}
+
+  .summary-row{display:flex;gap:14px;margin-bottom:26px;}
+  .summary-card{
+    flex:1; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-md); padding:18px 20px; box-shadow:var(--shadow);
+  }
+  .summary-label{font-size:12px;color:var(--text-muted);margin-bottom:6px;}
+  .summary-value{font-family:var(--font-mono);font-size:22px;font-weight:600;}
+
+  .txn-list{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    overflow:hidden;
+  }
+  .txn-row{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 18px;
+    border-bottom:1px solid var(--border);
+  }
+  .txn-row:last-child{border-bottom:none;}
+  .txn-icon{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    background:var(--danger-bg);color:var(--danger);
+  }
+  .txn-icon svg{width:15px;height:15px;}
+  .txn-mid{flex:1;min-width:0;}
+  .txn-name{font-size:14px;font-weight:500;text-transform:capitalize;}
+  .txn-date{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .txn-amt{font-family:var(--font-mono);font-size:14px;font-weight:500;text-align:right;color:var(--text);}
+  .txn-status{
+    font-size:10.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--success);margin-top:3px;text-align:right;
+  }
+  .empty-state{
+    padding:50px 20px;text-align:center;color:var(--text-muted);font-size:14px;
+  }
+
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr;}
+    .sidebar{
+      position:fixed;bottom:0;left:0;right:0;top:auto;
+      flex-direction:row;justify-content:space-around;
+      padding:10px 8px;z-index:10;
+      border-right:none;border-top:1px solid var(--border);
+    }
+    .brand,.nav-label,.nav-item span,.soon-tag{display:none;}
+    .nav-item{padding:8px;}
+    .main{padding:24px 18px 90px;}
+    .summary-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
+        <path d="M16 4C9 4 4 9.5 4 16c0 3 1.2 5.6 3.1 7.6.5.5 1.3.4 1.6-.3 1-2.1 3.4-6.4 7.3-6.4s6.3 4.3 7.3 6.4c.3.7 1.1.8 1.6.3C26.8 21.6 28 19 28 16c0-6.5-5-12-12-12z" fill="currentColor" style="color:var(--accent)"/>
+        <path d="M16 8.5c1.9 3 3.6 6 3.6 8.7 0 1.6-1.6 2.3-3.6 2.3s-3.6-.7-3.6-2.3c0-2.7 1.7-5.7 3.6-8.7z" fill="#000000"/>
+      </svg>
+      <span class="brand-name">BetterWallet</span>
+    </div>
+
+    <div class="nav-label">Wallet</div>
+    <a class="nav-item" href="/dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.5" cy="14" r="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item active" href="/my-transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M6 8l6-5 6 5M6 16l6 5 6-5"/></svg>
+      <span>Transactions</span>
+    </a>
+
+    <div class="nav-label">Services</div>
+    <a class="nav-item" href="/staffhook/jobs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span>StaffHook</span>
+    </a>
+    <a class="nav-item" href="/bettertrust">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3z"/></svg>
+      <span>Better-Trust</span>
+    </a>
+    <a class="nav-item" href="/cac">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-7h6v7"/></svg>
+      <span>Registrations</span>
+    </a>
+    <a class="nav-item disabled" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>
+      <span>Loans</span>
+      <span class="soon-tag">Soon</span>
+    </a>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div class="page-title">Transaction History</div>
+      <div class="page-sub">A record of every payment you've made on BetterWallet.</div>
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="summary-label">Total transactions</div>
+        <div class="summary-value">{{ transactions|length }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Total spent</div>
+        <div class="summary-value">&#8358;{{ '{:,.2f}'.format(transactions|sum(attribute='amount')) if transactions else '0.00' }}</div>
+      </div>
+    </div>
+
+    <div class="txn-list">
+      {% if transactions %}
+        {% for txn in transactions %}
+        <div class="txn-row">
+          <div class="txn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+          <div class="txn-mid">
+            <div class="txn-name">{{ txn.description }}</div>
+            <div class="txn-date">{{ txn.created_at }}</div>
+          </div>
+          <div>
+            <div class="txn-amt">&#8722;&#8358;{{ '{:,.2f}'.format(txn.amount) }}</div>
+            <div class="txn-status">{{ txn.status }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">You haven't made any payments yet.</div>
+      {% endif %}
+    </div>
+  </main>
+
+</div>
+</body>
+</html>
