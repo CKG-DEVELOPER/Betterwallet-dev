@@ -444,7 +444,7 @@
   <main class="main">
     <div class="topbar">
       <div class="greeting-block">
-        <div class="greeting-eyebrow"><span class="cursor-blink"></span>Afternoon session</div>
+        <div class="greeting-eyebrow"><span class="cursor-blink"></span><span id="session-greeting">Afternoon session</span></div>
         <div class="greeting">Welcome back, {{ session.user_name.split(' ')[0] if session.user_name else 'there' }}</div>
       </div>
       <div class="topbar-actions">
@@ -623,6 +623,24 @@
   </div>
 
 <script>
+ 
+
+  function setGreeting(){
+    const hour = new Date().getHours();
+    let text;
+    if (hour >= 5 && hour < 12) {
+      text = "Morning session";
+    } else if (hour >= 12 && hour < 17) {
+      text = "Afternoon session";
+    } else if (hour >= 17 && hour < 21) {
+      text = "Evening session";
+    } else {
+      text = "Night session";
+    }
+    document.getElementById('session-greeting').textContent = text;
+  }
+  setGreeting();
+
   const sunPath  = '<circle cx="12" cy="12" r="4.5"/><path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
   const moonPath = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>';
 
