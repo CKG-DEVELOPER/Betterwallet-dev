@@ -79,6 +79,13 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reason') === 'timeout') {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = 'You were logged out due to inactivity. Please log in again.';
+      errorMsg.classList.add('show');
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const errorMsg = document.getElementById('errorMsg');

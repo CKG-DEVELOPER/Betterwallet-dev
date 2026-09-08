@@ -965,7 +965,7 @@ def dashboard_data():
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect('/login?reason=timeout')
 
     conn = get_db_connection()
 
