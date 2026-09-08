@@ -908,6 +908,58 @@ def bettertrust_upload_document():
 def home():
     return render_template('index.html')
 
+@app.route('/dashboard-data')
+def dashboard_data():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in."}), 401
+
+    conn = get_db_connection()
+
+    new_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        JOIN jobs ON applications.job_id = jobs.id
+        WHERE jobs.employer_id = ? AND applications.viewed_by_employer = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    accepted_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        WHERE applicant_id = ? AND status = 'accepted' AND viewed_by_applicant = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    user = conn.execute('SELECT profile_photo FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+
+    recent_transactions = conn.execute('''
+        SELECT * FROM transactions
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT 4
+    ''', (session['user_id'],)).fetchall()
+
+    conn.close()
+
+    staffhook_notifications = new_applications + accepted_applications
+
+    transactions_list = []
+    for tx in recent_transactions:
+        transactions_list.append({
+            "id": tx["id"],
+            "service_type": tx["service_type"],
+            "description": tx["description"],
+            "amount": tx["amount"],
+            "status": tx["status"],
+            "created_at": tx["created_at"]
+        })
+
+    return jsonify({
+        "balance": 248500.00,
+        "user_name": session.get('user_name'),
+        "user_photo": user['profile_photo'] if user else None,
+        "staffhook_notifications": staffhook_notifications,
+        "recent_transactions": transactions_list
+    }), 200
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
