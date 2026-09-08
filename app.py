@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, session, redirect
+from datetime import timedelta
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,6 +16,7 @@ from database import get_db_connection, init_db, init_staffhook_tables, init_bet
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 CORS(app, supports_credentials=True)
 
 init_db()
@@ -1045,6 +1047,7 @@ def login():
     if not user or not check_password_hash(user['password'], password):
         return jsonify({"error": "Invalid email or password."}), 401
 
+    session.permanent = True
     session['user_id'] = user['id']
     session['user_name'] = user['name']
     session['user_email'] = user['email']
