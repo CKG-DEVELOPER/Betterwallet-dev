@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "betterwallet.db"
+DB_NAME = "/var/data/betterwallet.db"
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
