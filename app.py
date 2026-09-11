@@ -209,20 +209,31 @@ def scuml_hub():
 
     return jsonify({"success": True, "registration_id": new_id}), 201
 
-@app.route('/my-transactions')
-def my_transactions():
+@app.route('/my-transactions-data')
+def my_transactions_data():
     if 'user_id' not in session:
-        return redirect('/login')
+        return jsonify({"error": "not logged in."}), 401
 
     conn = get_db_connection()
     transactions = conn.execute('''
-        SELECT * FROM transactions
-        WHERE user_id = ?
-        ORDER BY created_at DESC
+        select * from transactions
+        where user_id = ?
+        order by created_at desc
     ''', (session['user_id'],)).fetchall()
     conn.close()
 
-    return render_template('my-transactions.html', transactions=transactions)
+    transactions_list = []
+    for tx in transactions:
+        transactions_list.append({
+            "id": tx["id"],
+            "service_type": tx["service_type"],
+            "description": tx["description"],
+            "amount": tx["amount"],
+            "status": tx["status"],
+            "created_at": tx["created_at"]
+        })
+
+    return jsonify({"transactions": transactions_list}), 200
 
 @app.route('/scuml/upload-document', methods=['POST'])
 def scuml_upload_document():
