@@ -455,6 +455,32 @@ def cac_my_registrations():
 
     return render_template('my-cac-registrations.html', registrations=registrations)
 
+@app.route('/cac/my-registrations-data')
+def cac_my_registrations_data():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in."}), 401
+
+    conn = get_db_connection()
+    registrations = conn.execute('''
+        SELECT * FROM cac_registrations
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+    ''', (session['user_id'],)).fetchall()
+    conn.close()
+
+    registrations_list = []
+    for reg in registrations:
+        registrations_list.append({
+            "id": reg["id"],
+            "registration_type": reg["registration_type"],
+            "business_name_1": reg["business_name_1"],
+            "payment_status": reg["payment_status"],
+            "application_status": reg["application_status"],
+            "created_at": reg["created_at"]
+        })
+
+    return jsonify({"registrations": registrations_list}), 200
+
 @app.route('/cac/verify-payment')
 def cac_verify_payment():
     if 'user_id' not in session:
