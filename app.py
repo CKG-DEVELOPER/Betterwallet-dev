@@ -3,6 +3,7 @@ from datetime import timedelta
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 import os
 import random
 import time
@@ -18,6 +19,9 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 CORS(app, supports_credentials=True)
+
+def get_serializer():
+    return URLSafeTimedSerializer(app.secret_key)
 
 init_db()
 init_staffhook_tables()
@@ -481,22 +485,28 @@ def cac_my_registrations_data():
 
     return jsonify({"registrations": registrations_list}), 200
 
-@app.route('/cac/verify-payment')
-def cac_verify_payment():
-    print(f"VERIFY-PAYMENT COOKIES RECEIVED: {request.cookies}")
-    if 'user_id' not in session:
-        return redirect('/login')
+@app.route('/cac/verify-payment/<token>')
+def cac_verify_payment(token):
+    serializer = get_serializer()
+    try:
+        token_data = serializer.loads(token, max_age=1800)  # 30 minutes
+    except SignatureExpired:
+        return render_template('payment-failed.html', retry_url='/cac')
+    except BadSignature:
+        return render_template('payment-failed.html', retry_url='/cac')
+
+    user_id = token_data['user_id']
+    registration_id = token_data['registration_id']
+    expected_tx_ref = token_data['tx_ref']
 
     status = request.args.get('status')
     tx_ref = request.args.get('tx_ref')
     transaction_id = request.args.get('transaction_id')
 
-    registration_id = session.get('pending_cac_id')
-
     if status not in ('successful', 'completed') or not transaction_id:
         return render_template('payment-failed.html', retry_url='/cac')
 
-    if session.get('cac_pending_tx_ref') != tx_ref:
+    if expected_tx_ref != tx_ref:
         return render_template('payment-failed.html', retry_url='/cac')
 
     flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
@@ -527,10 +537,17 @@ def cac_verify_payment():
     conn.execute('''
         INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
         VALUES (?, ?, ?, ?, ?, ?)
-    ''', (session['user_id'], 'cac', 'CAC Registration', tx_data['amount'], tx_ref, 'successful'))
+    ''', (user_id, 'cac', 'CAC Registration', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
+    # Re-establish the session from the token in case the WebView cookie was never set
+    session.permanent = True
+    session['user_id'] = user_id
+    if token_data.get('user_name'):
+        session['user_name'] = token_data['user_name']
+    if token_data.get('user_email'):
+        session['user_email'] = token_data['user_email']
     session.pop('cac_pending_tx_ref', None)
 
     return redirect('/cac?payment=verified')
@@ -656,6 +673,15 @@ def cac_initiate_payment():
 
     session['cac_pending_tx_ref'] = tx_ref
 
+    serializer = get_serializer()
+    token = serializer.dumps({
+        'user_id': session['user_id'],
+        'user_name': session.get('user_name'),
+        'user_email': session.get('user_email'),
+        'registration_id': registration_id,
+        'tx_ref': tx_ref
+    })
+
     response = requests.post(
         'https://api.flutterwave.com/v3/payments',
         headers={"Authorization": f"Bearer {flw_secret_key}"},
@@ -663,7 +689,7 @@ def cac_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/cac/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/cac/verify-payment/{token}",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
