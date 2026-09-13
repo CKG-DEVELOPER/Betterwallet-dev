@@ -497,8 +497,10 @@ def cac_registration_detail(registration_id):
     ''', (registration_id, session['user_id'])).fetchone()
     conn.close()
 
-    if not reg:
+        if not reg:
         return jsonify({"error": "Registration not found."}), 404
+
+    base_url = os.getenv('BASE_URL', 'http://127.0.0.1:5000')
 
     return jsonify({
         "id": reg["id"],
@@ -512,9 +514,10 @@ def cac_registration_detail(registration_id):
         "business_address": reg["business_address"],
         "payment_status": reg["payment_status"],
         "application_status": reg["application_status"],
-        "created_at": reg["created_at"]
+        "created_at": reg["created_at"],
+        "id_document_url": f"{base_url}/static/uploads/{reg['id_document']}" if reg["id_document"] else None,
+        "passport_photo_url": f"{base_url}/static/uploads/{reg['passport_photo']}" if reg["passport_photo"] else None
     }), 200
-
 @app.route('/cac/verify-payment/<token>')
 def cac_verify_payment(token):
     serializer = get_serializer()
