@@ -485,6 +485,36 @@ def cac_my_registrations_data():
 
     return jsonify({"registrations": registrations_list}), 200
 
+@app.route('/cac/registration/<int:registration_id>')
+def cac_registration_detail(registration_id):
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in."}), 401
+
+    conn = get_db_connection()
+    reg = conn.execute('''
+        SELECT * FROM cac_registrations
+        WHERE id = ? AND user_id = ?
+    ''', (registration_id, session['user_id'])).fetchone()
+    conn.close()
+
+    if not reg:
+        return jsonify({"error": "Registration not found."}), 404
+
+    return jsonify({
+        "id": reg["id"],
+        "registration_type": reg["registration_type"],
+        "full_name": reg["full_name"],
+        "phone": reg["phone"],
+        "email": reg["email"],
+        "business_name_1": reg["business_name_1"],
+        "business_name_2": reg["business_name_2"],
+        "nature_of_business": reg["nature_of_business"],
+        "business_address": reg["business_address"],
+        "payment_status": reg["payment_status"],
+        "application_status": reg["application_status"],
+        "created_at": reg["created_at"]
+    }), 200
+
 @app.route('/cac/verify-payment/<token>')
 def cac_verify_payment(token):
     serializer = get_serializer()
