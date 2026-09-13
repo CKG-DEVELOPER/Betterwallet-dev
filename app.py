@@ -16,7 +16,7 @@ from database import get_db_connection, init_db, init_staffhook_tables, init_bet
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key-change-this")
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 CORS(app, supports_credentials=True)
 
 init_db()
