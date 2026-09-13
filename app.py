@@ -367,6 +367,15 @@ def trademark_initiate_payment():
 
     session['trademark_pending_tx_ref'] = tx_ref
 
+    serializer = get_serializer()
+    token = serializer.dumps({
+        'user_id': session['user_id'],
+        'user_name': session.get('user_name'),
+        'user_email': session.get('user_email'),
+        'registration_id': registration_id,
+        'tx_ref': tx_ref
+    })
+
     response = requests.post(
         'https://api.flutterwave.com/v3/payments',
         headers={"Authorization": f"Bearer {flw_secret_key}"},
@@ -374,7 +383,7 @@ def trademark_initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/trademark/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/trademark/verify-payment/{token}",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -606,21 +615,28 @@ def cac_verify_payment(token):
 
     return redirect('/cac?payment=verified')
 
-@app.route('/trademark/verify-payment')
-def trademark_verify_payment():
-    if 'user_id' not in session:
-        return redirect('/login')
+@app.route('/trademark/verify-payment/<token>')
+def trademark_verify_payment(token):
+    serializer = get_serializer()
+    try:
+        token_data = serializer.loads(token, max_age=1800)
+    except SignatureExpired:
+        return render_template('payment-failed.html', retry_url='/cac')
+    except BadSignature:
+        return render_template('payment-failed.html', retry_url='/cac')
+
+    user_id = token_data['user_id']
+    registration_id = token_data['registration_id']
+    expected_tx_ref = token_data['tx_ref']
 
     status = request.args.get('status')
     tx_ref = request.args.get('tx_ref')
     transaction_id = request.args.get('transaction_id')
 
-    registration_id = session.get('pending_trademark_id')
-
     if status not in ('successful', 'completed') or not transaction_id:
         return render_template('payment-failed.html', retry_url='/cac')
 
-    if session.get('trademark_pending_tx_ref') != tx_ref:
+    if expected_tx_ref != tx_ref:
         return render_template('payment-failed.html', retry_url='/cac')
 
     flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
@@ -631,13 +647,11 @@ def trademark_verify_payment():
     )
 
     data = response.json()
-    print("TRADEMARK FLUTTERWAVE VERIFY RESPONSE:", data)
 
     if data.get('status') != 'success':
         return render_template('payment-failed.html', retry_url='/cac')
 
     tx_data = data['data']
-    print("TRADEMARK TX DATA:", tx_data)
 
     if tx_data['status'] not in ('successful', 'completed'):
         return render_template('payment-failed.html', retry_url='/cac')
@@ -653,10 +667,16 @@ def trademark_verify_payment():
     conn.execute('''
         INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
         VALUES (?, ?, ?, ?, ?, ?)
-    ''', (session['user_id'], 'trademark', 'Trademark Registration', tx_data['amount'], tx_ref, 'successful'))
+    ''', (user_id, 'trademark', 'Trademark Registration', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
+    session.permanent = True
+    session['user_id'] = user_id
+    if token_data.get('user_name'):
+        session['user_name'] = token_data['user_name']
+    if token_data.get('user_email'):
+        session['user_email'] = token_data['user_email']
     session.pop('trademark_pending_tx_ref', None)
 
     return redirect('/cac?payment=verified')
