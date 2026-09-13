@@ -497,7 +497,7 @@ def cac_registration_detail(registration_id):
     ''', (registration_id, session['user_id'])).fetchone()
     conn.close()
 
-        if not reg:
+    if not reg:
         return jsonify({"error": "Registration not found."}), 404
 
     base_url = os.getenv('BASE_URL', 'http://127.0.0.1:5000')
