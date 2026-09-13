@@ -481,9 +481,9 @@ def cac_my_registrations_data():
 
     return jsonify({"registrations": registrations_list}), 200
 
-print(f"VERIFY-PAYMENT COOKIES RECEIVED: {request.cookies}")
 @app.route('/cac/verify-payment')
 def cac_verify_payment():
+    print(f"VERIFY-PAYMENT COOKIES RECEIVED: {request.cookies}")
     if 'user_id' not in session:
         return redirect('/login')
 
