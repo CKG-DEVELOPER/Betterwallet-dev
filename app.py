@@ -192,6 +192,7 @@ def scuml_verify_payment(token):
     session.pop('scuml_pending_tx_ref', None)
 
     return redirect('/cac?payment=verified')
+
 @app.route('/scuml', methods=['GET', 'POST'])
 def scuml_hub():
     if 'user_id' not in session:
@@ -542,12 +543,20 @@ def cac_registration_detail(registration_id):
         "business_name_2": reg["business_name_2"],
         "nature_of_business": reg["nature_of_business"],
         "business_address": reg["business_address"],
+        "bvn": reg["bvn"],
+        "bank_name": reg["bank_name"],
+        "bank_account_number": reg["bank_account_number"],
+        "tin_number": reg["tin_number"],
+        "trademark_class": reg["trademark_class"],
+        "trademark_type": reg["trademark_type"],
+        "goods_services_description": reg["goods_services_description"],
         "payment_status": reg["payment_status"],
         "application_status": reg["application_status"],
         "created_at": reg["created_at"],
         "id_document_url": f"{base_url}/static/uploads/{reg['id_document']}" if reg["id_document"] else None,
         "passport_photo_url": f"{base_url}/static/uploads/{reg['passport_photo']}" if reg["passport_photo"] else None
     }), 200
+
 @app.route('/cac/verify-payment/<token>')
 def cac_verify_payment(token):
     serializer = get_serializer()
