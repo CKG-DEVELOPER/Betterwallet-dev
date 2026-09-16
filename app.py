@@ -1566,43 +1566,6 @@ def find_jobs():
         accepted_applications=accepted_applications
     )
 
-@app.route('/staffhook/jobs')
-def find_jobs():
-    if 'user_id' not in session:
-        return redirect('/login')
-
-    conn = get_db_connection()
-    jobs = conn.execute('''
-        SELECT jobs.*, users.name AS employer_name, users.profile_photo AS employer_photo
-        FROM jobs
-        LEFT JOIN users ON jobs.employer_id = users.id
-        WHERE jobs.status = 'open'
-        ORDER BY jobs.created_at DESC
-    ''').fetchall()
-
-    new_applications = conn.execute('''
-        SELECT COUNT(*) AS count
-        FROM applications
-        JOIN jobs ON applications.job_id = jobs.id
-        WHERE jobs.employer_id = ? AND applications.viewed_by_employer = 0
-    ''', (session['user_id'],)).fetchone()['count']
-
-    accepted_applications = conn.execute('''
-        SELECT COUNT(*) AS count
-        FROM applications
-        WHERE applicant_id = ? AND status = 'accepted' AND viewed_by_applicant = 0
-    ''', (session['user_id'],)).fetchone()['count']
-
-    conn.close()
-
-    return render_template(
-        'find-jobs.html',
-        jobs=jobs,
-        current_user_id=session['user_id'],
-        new_applications=new_applications,
-        accepted_applications=accepted_applications
-    )
-
 @app.route('/staffhook/apply/<int:job_id>', methods=['POST'])
 def apply_to_job(job_id):
     if 'user_id' not in session:
