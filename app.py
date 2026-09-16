@@ -1243,6 +1243,8 @@ def initiate_payment():
     if 'user_id' not in session:
         return jsonify({"error": "You must be logged in."}), 401
 
+    data = request.json or {}
+
     flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
     tx_ref = f"staffhook-{session['user_id']}-{int(time.time())}"
 
@@ -1253,7 +1255,13 @@ def initiate_payment():
         'user_id': session['user_id'],
         'user_name': session.get('user_name'),
         'user_email': session.get('user_email'),
-        'tx_ref': tx_ref
+        'tx_ref': tx_ref,
+        'title': data.get('title', '').strip(),
+        'description': data.get('description', '').strip(),
+        'category': data.get('category', '').strip(),
+        'location': data.get('location', '').strip(),
+        'pay_rate': data.get('pay_rate', '').strip(),
+        'pay_type': data.get('pay_type', '').strip()
     })
 
     response = requests.post(
