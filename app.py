@@ -1248,6 +1248,14 @@ def initiate_payment():
 
     session['pending_tx_ref'] = tx_ref
 
+    serializer = get_serializer()
+    token = serializer.dumps({
+        'user_id': session['user_id'],
+        'user_name': session.get('user_name'),
+        'user_email': session.get('user_email'),
+        'tx_ref': tx_ref
+    })
+
     response = requests.post(
         'https://api.flutterwave.com/v3/payments',
         headers={"Authorization": f"Bearer {flw_secret_key}"},
@@ -1255,7 +1263,7 @@ def initiate_payment():
             "tx_ref": tx_ref,
             "amount": "2500",
             "currency": "NGN",
-            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/staffhook/verify-payment",
+            "redirect_url": f"{os.getenv('BASE_URL', 'http://127.0.0.1:5000')}/staffhook/verify-payment/{token}",
             "customer": {
                 "email": session.get('user_email', 'test@betterwallet.com')
             },
@@ -1275,10 +1283,18 @@ def initiate_payment():
     payment_link = data['data']['link']
     return jsonify({"payment_link": payment_link}), 200
 
-@app.route('/staffhook/verify-payment')
-def verify_payment():
-    if 'user_id' not in session:
-        return redirect('/login')
+@app.route('/staffhook/verify-payment/<token>')
+def verify_payment(token):
+    serializer = get_serializer()
+    try:
+        token_data = serializer.loads(token, max_age=1800)
+    except SignatureExpired:
+        return render_template('payment-failed.html', retry_url='/staffhook/post-job')
+    except BadSignature:
+        return render_template('payment-failed.html', retry_url='/staffhook/post-job')
+
+    user_id = token_data['user_id']
+    expected_tx_ref = token_data['tx_ref']
 
     status = request.args.get('status')
     tx_ref = request.args.get('tx_ref')
@@ -1287,7 +1303,7 @@ def verify_payment():
     if status not in ('successful', 'completed') or not transaction_id:
         return render_template('payment-failed.html', retry_url='/staffhook/post-job')
 
-    if session.get('pending_tx_ref') != tx_ref:
+    if expected_tx_ref != tx_ref:
         return render_template('payment-failed.html', retry_url='/staffhook/post-job')
 
     flw_secret_key = os.getenv('FLUTTERWAVE_SECRET_KEY')
@@ -1317,10 +1333,16 @@ def verify_payment():
     conn.execute('''
         INSERT INTO transactions (user_id, service_type, description, amount, tx_ref, status)
         VALUES (?, ?, ?, ?, ?, ?)
-    ''', (session['user_id'], 'staffhook', 'StaffHook Job Posting', tx_data['amount'], tx_ref, 'successful'))
+    ''', (user_id, 'staffhook', 'StaffHook Job Posting', tx_data['amount'], tx_ref, 'successful'))
     conn.commit()
     conn.close()
 
+    session.permanent = True
+    session['user_id'] = user_id
+    if token_data.get('user_name'):
+        session['user_name'] = token_data['user_name']
+    if token_data.get('user_email'):
+        session['user_email'] = token_data['user_email']
     session['payment_verified'] = True
     session.pop('pending_tx_ref', None)
 
@@ -1451,6 +1473,9 @@ def post_job():
 
     if request.method == 'GET':
         return render_template('post-job.html')
+
+    if not session.get('payment_verified'):
+        return jsonify({"error": "Please complete payment before posting a job."}), 402
 
     data = request.json
     title = data.get('title', '').strip()
