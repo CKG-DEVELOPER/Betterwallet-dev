@@ -1498,6 +1498,74 @@ def post_job():
 
     return jsonify({"message": "Job posted successfully and is now live on StaffHook."}), 201
 
+@app.route('/staffhook/jobs-data')
+def find_jobs_data():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in."}), 401
+
+    conn = get_db_connection()
+    jobs = conn.execute('''
+        SELECT jobs.*, users.name AS employer_name
+        FROM jobs
+        LEFT JOIN users ON jobs.employer_id = users.id
+        WHERE jobs.status = 'open'
+        ORDER BY jobs.created_at DESC
+    ''').fetchall()
+    conn.close()
+
+    jobs_list = []
+    for job in jobs:
+        jobs_list.append({
+            "id": job["id"],
+            "title": job["title"],
+            "description": job["description"],
+            "category": job["category"],
+            "location": job["location"],
+            "pay_rate": job["pay_rate"],
+            "pay_type": job["pay_type"],
+            "employer_name": job["employer_name"],
+            "created_at": job["created_at"]
+        })
+
+    return jsonify({"jobs": jobs_list}), 200
+
+@app.route('/staffhook/jobs')
+def find_jobs():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    conn = get_db_connection()
+    jobs = conn.execute('''
+        SELECT jobs.*, users.name AS employer_name, users.profile_photo AS employer_photo
+        FROM jobs
+        LEFT JOIN users ON jobs.employer_id = users.id
+        WHERE jobs.status = 'open'
+        ORDER BY jobs.created_at DESC
+    ''').fetchall()
+
+    new_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        JOIN jobs ON applications.job_id = jobs.id
+        WHERE jobs.employer_id = ? AND applications.viewed_by_employer = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    accepted_applications = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM applications
+        WHERE applicant_id = ? AND status = 'accepted' AND viewed_by_applicant = 0
+    ''', (session['user_id'],)).fetchone()['count']
+
+    conn.close()
+
+    return render_template(
+        'find-jobs.html',
+        jobs=jobs,
+        current_user_id=session['user_id'],
+        new_applications=new_applications,
+        accepted_applications=accepted_applications
+    )
+
 @app.route('/staffhook/jobs')
 def find_jobs():
     if 'user_id' not in session:
