@@ -1090,6 +1090,38 @@ def bettertrust_upload_document():
 
     return jsonify({"message": "Document uploaded.", "filename": filename}), 200
 
+@app.route('/staffhook/request-job/upload-photo', methods=['POST'])
+def request_job_upload_photo():
+    if 'user_id' not in session:
+        return jsonify({"error": "You must be logged in."}), 401
+
+    listing_id = session.get('pending_worker_listing_id')
+    if not listing_id:
+        return jsonify({"error": "No listing in progress. Please start over."}), 400
+
+    photo_number = request.form.get('photo_number')
+    if photo_number not in ('1', '2'):
+        return jsonify({"error": "Invalid photo number."}), 400
+
+    column = 'photo' if photo_number == '1' else 'photo_2'
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded."}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected."}), 400
+
+    filename = f"worker_{listing_id}_photo{photo_number}_{file.filename}"
+    file.save(os.path.join('static/uploads', filename))
+
+    conn = get_db_connection()
+    conn.execute(f'UPDATE worker_listings SET {column} = ? WHERE id = ?', (filename, listing_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Photo uploaded.", "filename": filename}), 200
+
 @app.route('/')
 def home():
     return render_template('index.html')
