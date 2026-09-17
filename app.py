@@ -1650,9 +1650,13 @@ def request_job():
         VALUES (?, ?, ?, ?, ?, ?, 'active', ?)
     ''', (session['user_id'], full_name, phone, skill, bio, location, verified_flag))
     conn.commit()
+
+    new_id = conn.execute('SELECT last_insert_rowid() AS id').fetchone()['id']
     conn.close()
 
-    return jsonify({"message": "Your listing is now live on Request a Job."}), 201
+    session['pending_worker_listing_id'] = new_id
+
+    return jsonify({"message": "Your listing is now live on Request a Job.", "listing_id": new_id}), 201
 
 @app.route('/staffhook/upgrade-listing/<int:listing_id>', methods=['POST'])
 def upgrade_listing(listing_id):
