@@ -142,6 +142,8 @@ def init_staffhook_tables():
             FOREIGN KEY (employer_id) REFERENCES users (id)
         )
     ''')
+    if not _column_exists(conn, 'worker_listings', 'photo_2'):
+        conn.execute('ALTER TABLE worker_listings ADD COLUMN photo_2 TEXT')
 
     conn.execute('''
         CREATE TABLE IF NOT EXISTS applications (
