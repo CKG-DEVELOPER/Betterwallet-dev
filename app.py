@@ -1471,6 +1471,28 @@ def me():
         return jsonify({"logged_in": True, "name": session.get('user_name')})
     return jsonify({"logged_in": False})
 
+@app.route('/profile-data')
+def profile_data():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in."}), 401
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    conn.close()
+
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    base_url = os.getenv('BASE_URL', 'http://127.0.0.1:5000')
+
+    return jsonify({
+        "name": user["name"],
+        "email": user["email"],
+        "phone": user["phone"],
+        "profile_photo_url": f"{base_url}/static/uploads/{user['profile_photo']}" if user["profile_photo"] else None
+    }), 200
+
+
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if 'user_id' not in session:
